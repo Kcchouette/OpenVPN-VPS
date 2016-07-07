@@ -90,7 +90,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	done
 else
 	clear # OpenVPN setup and first user creation
-	echo 'Welcome to this quick OpenVPN "road warrior" installer'
+	echo 'Welcome to this quick OpenVPN installer'
 	echo ""
 	echo "First, choose which variant of the script you want to use."
 	echo '"Fast" is secure, but "slow" is the best encryption you can get, at the cost of speed (not that slow though)'
@@ -99,15 +99,17 @@ else
 	while [[ $VARIANT != "1" && $VARIANT != "2" ]]; do
 		read -p "Variant [1-2]: " -e -i 2 VARIANT
 	done
-	
+
 	echo ""
 	echo "I need to know the IPv4 address of the network interface you want OpenVPN listening to."
 	echo "If you server is running behind a NAT, (e.g. LowEndSpirit, Scaleway) leave the IP adress as it is. (local/private IP"
 	echo "Otherwise, it sould be your public IPv4 address."
 	read -p "IP address: " -e -i $IP IP
+
 	echo ""
 	echo "What port do you want for OpenVPN?"
 	read -p "Port: " -e -i 1194 PORT
+
 	echo ""
 	echo "What DNS do you want to use with the VPN?"
 	echo " 1) Current system resolvers"
@@ -117,6 +119,7 @@ else
 	echo " 5) OpenDNS"
 	echo " 6) Google"
 	read -p "DNS [1-6]: " -e -i 2 DNS
+
 	echo ""
 	echo "Some setups (e.g. Amazon Web Services), require use of MASQUERADE rather than SNAT"
 	echo "Which forwarding method do you want to use [if unsure, leave as default]?"
@@ -125,13 +128,16 @@ else
 	while [[ $FORWARD_TYPE != "1" && $FORWARD_TYPE != "2" ]]; do
 		read -p "Forwarding type: " -e -i 1 FORWARD_TYPE
 	done
+
 	#INPUT MAX CONNECTIONS
 	read -p "Maximum Connections: " -e -i 5 MAXCONNS
+
 	#INPUT DEFAULT DOMAIN
 	echo ""
 	read -p "(Optional) Enter a Default Domain: " -e -i example.com DOMAIN1
 	echo ""
 	#END DEFAULT DOMAIN
+
 	echo "Input CA Parameters:"
 	#INPUT CA PARAMETERS
 	read -p "CA Country: " -e -i US CACOUNTRY
@@ -152,8 +158,10 @@ else
 	echo ""
 	echo "Okay, we are ready to setup your OpenVPN server now"
 	read -n1 -r -p "Press any key to continue..."
+
 	if [[ "$OS" = 'debian' ]]; then
 		apt-get install ca-certificates -y
+
 		# We add the OpenVPN repo to get the latest version.
 		# Debian 7
 		if [[ "$VERSION_ID" = 'VERSION_ID="7"' ]]; then
@@ -179,14 +187,14 @@ else
 			wget -O - https://swupdate.openvpn.net/repos/repo-public.gpg | apt-key add -
 			apt-get update
 		fi
-		# The repo, is not available for Ubuntu 15.10 and 16.04, but it has OpenVPN > 2.3.3, so we do nothing.
-		# The we install OpnVPN
+		# The repo, is not available for Ubuntu 15.10 and 16.04, but it has OpenVPN > 2.3.3, so we do nothing
+
+		# Then we install OpnVPN and some tools
 		apt-get install openvpn iptables openssl wget ca-certificates curl ufw nano -y
-		
 	fi
 
-  ufw allow ssh
-  ufw enable
+	ufw allow ssh
+	ufw enable
 
 	# find out if the machine uses nogroup or nobody for the permissionless group
 	if grep -qs "^nogroup:" /etc/group; then
@@ -194,13 +202,13 @@ else
 	else
   	NOGROUP=nobody
 	fi
-	
+
 	# An old version of easy-rsa was available by default in some openvpn packages
 	if [[ -d /etc/openvpn/easy-rsa/ ]]; then
 		rm -rf /etc/openvpn/easy-rsa/
 	fi
 
-	# Get easy-rsa
+	# Get easy-rsa from Github
 	wget -O ~/EasyRSA-3.0.1.tgz https://github.com/OpenVPN/easy-rsa/releases/download/3.0.1/EasyRSA-3.0.1.tgz
 	tar xzf ~/EasyRSA-3.0.1.tgz -C ~/
 	mv ~/EasyRSA-3.0.1/ /etc/openvpn/
@@ -208,7 +216,7 @@ else
 	chown -R root:root /etc/openvpn/easy-rsa/
 	rm -rf ~/EasyRSA-3.0.1.tgz
 	cd /etc/openvpn/easy-rsa/
-	
+
 	# If the user selected the fast, less hardened version
 	if [[ "$VARIANT" = '1' ]]; then
 		echo "set_var EASYRSA_KEY_SIZE 2048
@@ -251,13 +259,13 @@ set_var EASYRSA_REQ_CN		"$CACN"
 	# generate tls-auth key
 	openvpn --genkey --secret /etc/openvpn/tls-auth.key
 
-  # Move the stuff we need
+	# Move the stuff we need
 	cp pki/ca.crt pki/private/ca.key pki/dh.pem pki/issued/server.crt pki/private/server.key /etc/openvpn/easy-rsa/pki/crl.pem /etc/openvpn
 
-  # Make cert revocation list readable for non-root
+	# Make cert revocation list readable for non-root
 	chmod 644 /etc/openvpn/crl.pem
 
-  # Generate server.conf
+	# Generate server.conf
 	echo "port $PORT
 proto udp
 dev tun
@@ -285,7 +293,7 @@ tls-version-min 1.2" > /etc/openvpn/server.conf
 
 	echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
 
-  # DHCP OPTIONS
+  	# DHCP OPTIONS
 	if [[ "$DOMAIN1" != "" ]]; then
 		echo "push \"dhcp-option DOMAIN $DOMAIN1\"" >> /etc/openvpn/server.conf
 		echo "push \"dhcp-option SEARCH $DOMAIN1\"" >> /etc/openvpn/server.conf
