@@ -6,16 +6,22 @@
 # bulletproof but it will probably work if you simply want to setup a VPN on
 # your Debian/Ubuntu box.
 
+# Detect Debian users running the script with "sh" instead of bash
+if readlink /proc/$$/exe | grep -qs "dash"; then
+	echo "This script needs to be run with bash, not sh"
+	exit 1
+fi
+
 #check it's root
 if [[ "$EUID" -ne 0 ]]; then
 	echo "Sorry, you need to run this as root"
-	exit 1
+	exit 2
 fi
 
 #check tun is available
 if [[ ! -e /dev/net/tun ]]; then
 	echo "TUN is not available"
-	exit 2
+	exit 3
 fi
 
 #check debian version
@@ -71,6 +77,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 		echo " 1) Add a cert for a new user"
 		echo " 4) Exit"
 		read -p "Select an option [1-4]: " option
+
 		case $option in
 			1) 
 			echo ""
@@ -198,9 +205,9 @@ else
 
 	# find out if the machine uses nogroup or nobody for the permissionless group
 	if grep -qs "^nogroup:" /etc/group; then
-  	NOGROUP=nogroup
+  		NOGROUP=nogroup
 	else
-  	NOGROUP=nobody
+  		NOGROUP=nobody
 	fi
 
 	# An old version of easy-rsa was available by default in some openvpn packages
@@ -317,7 +324,7 @@ tls-version-min 1.2" > /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS $ns1\"" >> /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS $ns2\"" >> /etc/openvpn/server.conf
 		;;
-		5) #DNS.WATCH 
+		4) #DNS.WATCH 
 		echo 'push "dhcp-option DNS 84.200.69.80"' >> /etc/openvpn/server.conf
 		echo 'push "dhcp-option DNS 84.200.70.40"' >> /etc/openvpn/server.conf
 		;;
@@ -407,14 +414,6 @@ verb 0" >> /etc/openvpn/server.conf
 			systemctl restart openvpn@server.service
 		else
 			/etc/init.d/openvpn restart
-		fi
-	else
-		if pgrep systemd-journal; then
-			systemctl restart openvpn@server.service
-			systemctl enable openvpn@server.service
-		else
-			service openvpn restart
-			chkconfig openvpn on
 		fi
 	fi
 
