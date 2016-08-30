@@ -375,7 +375,7 @@ verb 0" >> /etc/openvpn/server.conf
 			firewall-cmd --zone=trusted --add-masquerade
 			firewall-cmd --permanent --zone=trusted --add-masquerade
 		fi
-	elif ufw status | grep -qw active; then
+	elif hash ufw 2>/dev/null && ufw status | grep -qw active; then
 		ufw allow $PORT/udp
 		if [[ "$FORWARD_TYPE" = '1' ]]; then
 			sed -i '1s/^/##OPENVPN_START\n*nat\n:POSTROUTING ACCEPT [0:0]\n-A POSTROUTING -s 10.8.0.0\/24 -o eth0 -j MASQUERADE\nCOMMIT\n##OPENVPN_END\n\n/' /etc/ufw/before.rules
