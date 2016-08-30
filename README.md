@@ -13,10 +13,10 @@ This fork includes the following features:
 - AES-256-CBC and SHA-512 for HMAC (instead of BF-128-CBC and SHA1)
 - Run server in unprivileged mode, reducing risks to the system
 - TLS-auth to help [thwart DoS attacks](https://openvpn.net/index.php/open-source/documentation/howto.html#security) and provide a 2nd line of defense to the TLS channel.
-- [FDN's DNS Servers](http://www.fdn.fr/actions/dns/)
+- [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
 - [DNS.WATCH DNS Servers](https://dns.watch/index)
-- Up-to-date OpenVPN (2.3.11) thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
+- Up-to-date OpenVPN (2.3.12) thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
 - Support for either SNAT or MASQUERADE for forwarding
 
 ## Variants
