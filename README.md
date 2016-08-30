@@ -1,8 +1,8 @@
 # OpenVPN-VPS
 Install OpenVPN on a new VPS and some tools
 
-##Fork
-This fork includes :
+## Fork
+This fork includes the following features:
 - No logs
 - No comp-lzo [compression is a vector for oracle attacks, e.g. CRIME or BREACH](https://github.com/BetterCrypto/Applied-Crypto-Hardening/pull/91#issuecomment-75388575)
 - Better encryption (see below)
@@ -44,8 +44,10 @@ Features:
 The script is made to work on these OS :
 - Debian 8
 
-##Installation
-Run the script and follow the assistant:
+## Installation
+**You have to enable the TUN module otherwise OpenVPN won't work.** If the TUN module is not enabled, the script will tell you. Ask your host if you don't know how to do it.
+
+Then download the script, run it and follow the assistant:
 
 ```
 wget https://raw.githubusercontent.com/Kcchouette/OpenVPN-VPS/master/openvpn-install.sh
@@ -53,9 +55,12 @@ chmod +x openvpn-install.sh
 ./openvpn-install.sh
 ```
 
-Once it ends, you should run it again to add users.
+Once it ends, you should run it again to add users:
+```
+./openvpn-install.sh
+```
 
-##Based on:
+## Based on:
 - https://github.com/Nyr/openvpn-install/tree/dab9a210c2a57f4401ab3dacd8c1efce16e5dec2
-- https://github.com/Angristan/OpenVPN-install/tree/41a38a1e32fac457e3321c76dc1c9409c77f7c1c
+- https://github.com/Angristan/OpenVPN-install/tree/2ce510aef5950e52fc83fbff5704204f78a480f4
 - https://github.com/dwarnaka/OpenVPN-install/tree/2854fca5952f7c413dc259f8199b44a35ae461f0
