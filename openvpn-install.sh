@@ -348,8 +348,9 @@ tls-auth tls-auth.key 0
 verb 0" >> /etc/openvpn/server.conf
 
 	# Enable net.ipv4.ip_forward for the system
-	if [[ "$OS" = 'debian' ]]; then
-		sed -i 's|#net.ipv4.ip_forward=1|net.ipv4.ip_forward=1|' /etc/sysctl.conf
+	sed -i '/net.ipv4.ip_forward/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
+	if ! grep -q "net.ipv4.ip_forward" /etc/sysctl.conf; then
+		echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 	fi
 
 	# Avoid an unneeded reboot
