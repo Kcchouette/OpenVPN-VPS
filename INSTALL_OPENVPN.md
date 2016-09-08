@@ -4,8 +4,8 @@
 * Platforms
   * [Windows](#windows)
   * [OS X](#os-x)
-  * [GNU/Linux](#gnu/linux)
-  * [Linux (Network-manager)](#gnu/linux-networkmanager)
+  * [GNU/Linux](#gnulinux)
+  * [Linux (Network-manager)](#gnulinux-networkmanager)
   * [Android](#android)
   * [iOS](#ios)
 
