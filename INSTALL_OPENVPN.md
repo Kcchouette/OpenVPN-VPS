@@ -1,3 +1,13 @@
+# How to install the openvpn software?
+
+----
+* Platforms
+  * [Windows](#windows)
+  * [OS X](#os-x)
+  * [GNU/Linux](#gnu/linux)
+  * [Linux (Network-manager)](#gnu/linux-networkmanager)
+  * [Android](#android)
+  * [iOS](#ios)
 
 ## Windows
 
@@ -32,7 +42,7 @@
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
 
-## Linux
+## GNU/Linux
 1. Install OpenVPN:
 
    `sudo apt-get install openvpn` OR `sudo yum install openvpn` OR `esoteric-package-manager hipster openvpn`
@@ -46,7 +56,7 @@
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
 
-## Linux (NetworkManager)
+## GNU/Linux (NetworkManager)
 It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager. This gives you a nice little interface for connecting, and it properly handles the necessary DNS changes when you connect/disconnect. 
 
 1. First, download your `.ovpn` file.
