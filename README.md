@@ -62,5 +62,5 @@ Once it ends, you should run it again to add users:
 
 ## Based on:
 - https://github.com/Nyr/openvpn-install/tree/b6f0c42b5b22bd57cc7536998c7dc871ace05237
-- https://github.com/Angristan/OpenVPN-install/tree/2ce510aef5950e52fc83fbff5704204f78a480f4
+- https://github.com/Angristan/OpenVPN-install/tree/e9654ef824c6e86447592b55dc92b290b5b11cd8
 - https://github.com/dwarnaka/OpenVPN-install/tree/2854fca5952f7c413dc259f8199b44a35ae461f0
