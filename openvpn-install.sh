@@ -229,7 +229,6 @@ else
 	# If the user selected the fast, less hardened version
 	if [[ "$VARIANT" = '1' ]]; then
 		echo "set_var EASYRSA_KEY_SIZE 2048
-set_var EASYRSA_KEY_SIZE 2048
 set_var EASYRSA_DIGEST "sha256"
 set_var EASYRSA_DN	""org""
 set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
@@ -245,7 +244,6 @@ set_var EASYRSA_REQ_CN		"$CACN"
 	# If the user selected the relatively slow, ultra hardened version
 	if [[ "$VARIANT" = '2' ]]; then
 		echo "set_var EASYRSA_KEY_SIZE 4096
-set_var EASYRSA_KEY_SIZE 4096
 set_var EASYRSA_DIGEST "sha384"
 set_var EASYRSA_DN	""org""
 set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
