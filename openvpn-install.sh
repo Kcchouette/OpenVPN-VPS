@@ -126,8 +126,9 @@ else
 	echo " 5) UncensoredDNS"
 	echo " 6) OpenDNS"
 	echo " 7) Google"
+	echo " 8) Enter 2 other DNS"
 	
-	read -p "DNS [1-7]: " -e -i 2 DNS
+	read -p "DNS [1-8]: " -e -i 2 DNS
 
 	echo ""
 	echo "Some setups (e.g. Amazon Web Services), require use of MASQUERADE rather than SNAT"
@@ -339,6 +340,12 @@ tls-version-min 1.2" > /etc/openvpn/server.conf
 		7) #Google 
 		echo 'push "dhcp-option DNS 8.8.8.8"' >> /etc/openvpn/server.conf
 		echo 'push "dhcp-option DNS 8.8.4.4"' >> /etc/openvpn/server.conf
+		;;
+		8) #other DNS
+		read -p "IP for DNS_1: " -e DNS_1
+		read -p "IP for DNS_2: " -e DNS_2
+		echo "push \"dhcp-option DNS $DNS_1\"" >> /etc/openvpn/server.conf
+		echo "push \"dhcp-option DNS $DNS_2\"" >> /etc/openvpn/server.conf
 		;;
 	esac
 
