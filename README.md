@@ -26,19 +26,19 @@ If you're just using your VPN at home, you may choose *fast*. But if you're ofte
 
 FYI, *fast* is still more secured than default OpenVPN settings.
 
-### Slow (high encryption)
-Features:
-- 4096 bits RSA private key
-- 4096 bits Diffie-Hellman key
-- 256 bits AES-GCM
-- SHA-384 RSA certificate
-
 ### Fast (lower encryption)
 Features:
 - 2048 bits RSA private key
 - 2048 bits Diffie-Hellman key
 - 128 bits AES-GCM
 - SHA-256 RSA certificate
+
+### Slow (high encryption)
+Features:
+- 4096 bits RSA private key
+- 4096 bits Diffie-Hellman key
+- 256 bits AES-GCM
+- SHA-384 RSA certificate
 
 ## Compatibility
 The script is made to work on these OS :
