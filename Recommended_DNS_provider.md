@@ -1,5 +1,7 @@
 # Recommended DNS Provider
 
+Update 17/09/2016
+
 ## FR
 
  - [37.187.0.40](https://servers.opennicproject.org/edit.php?srv=ns9.fr.dns.opennic.glue)
