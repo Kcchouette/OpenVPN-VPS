@@ -1,5 +1,5 @@
 # OpenVPN-VPS
-Install OpenVPN on a new VPS and some tools
+Install OpenVPN on a new VPS and some tools (nano)
 
 ## Fork
 This fork includes the following features:
@@ -16,6 +16,7 @@ This fork includes the following features:
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
 - [DNS.WATCH DNS Servers](https://dns.watch/index)
+- What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md)
 - Up-to-date OpenVPN (2.3.12) thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
 - Support for either SNAT or MASQUERADE for forwarding
 
@@ -59,6 +60,15 @@ Once it ends, you should run it again to add users:
 ```
 ./openvpn-install.sh
 ```
+
+Then give all the `.ovpn` to your client!
+
+## Installation of openVPN for the client
+See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/INSTALL_OPENVPN.md)
+
+## Test of how secure is your VPN
+ * https://whoer.net/#extended
+ * https://www.dnsleaktest.com/
 
 ## Based on:
 - https://github.com/Nyr/openvpn-install/tree/b6f0c42b5b22bd57cc7536998c7dc871ace05237
