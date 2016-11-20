@@ -1,23 +1,12 @@
 # Recommended DNS Provider
 
-Update 17/09/2016
+Update 20/11/2016
 
-## FR
-
- - [37.187.0.40](https://servers.opennicproject.org/edit.php?srv=ns9.fr.dns.opennic.glue)
- - [185.121.177.177](https://servers.opennicproject.org/edit.php?srv=ns1.any.dns.opennic.glue)
- 
-## LT
+## FR; LT; RO or SE
 
  - [185.121.177.177](https://servers.opennicproject.org/edit.php?srv=ns1.any.dns.opennic.glue)
  - [185.121.177.53](https://servers.opennicproject.org/edit.php?srv=ns3.any.dns.opennic.glue)
  
-## RO
- 
- - [77.81.104.121](https://servers.opennicproject.org/edit.php?srv=ns2.ro.dns.opennic.glue)
- - [185.121.177.177](https://servers.opennicproject.org/edit.php?srv=ns1.any.dns.opennic.glue)
- 
-## SE
- 
- - [95.215.44.124](https://servers.opennicproject.org/edit.php?srv=ns7.se.dns.opennic.glue)
- - [185.121.177.177](https://servers.opennicproject.org/edit.php?srv=ns1.any.dns.opennic.glue)
+## Another one
+
+d0wn is now separated of OpenNicProject : [https://dns.d0wn.biz/](https://dns.d0wn.biz/)
