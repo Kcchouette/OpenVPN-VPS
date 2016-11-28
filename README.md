@@ -3,16 +3,17 @@ Install OpenVPN on a new VPS and some tools (nano)
 
 ## Fork
 This fork includes the following features:
+- Choice for UDP or TCP (UDP is still recommended)
 - No logs
 - No comp-lzo [compression is a vector for oracle attacks, e.g. CRIME or BREACH](https://github.com/BetterCrypto/Applied-Crypto-Hardening/pull/91#issuecomment-75388575)
 - Better encryption (see below)
 - Avoid DNS leak
 - UFW support
 - TLS 1.2 only
-- Strong ciphers, DH keys and certificates. (see variants)
-- AES-256-CBC and SHA-512 for HMAC (instead of BF-128-CBC and SHA1)
+- Strong ciphers, DH keys and certificates  keys. (see [variants](#variants))
+- AES-256-CBC and SHA-512 encryption for HMAC (instead of BF-128-CBC and SHA1)
 - Run server in unprivileged mode, reducing risks to the system
-- TLS-auth to help [thwart DoS attacks](https://openvpn.net/index.php/open-source/documentation/howto.html#security) and provide a 2nd line of defense to the TLS channel.
+- TLS-auth support: it adds an additional HMAC signature to all SSL/TLS handshake packets for integrity verification thus allowing an additional level of security above and beyond that provided by SSL/TLS. [source](https://openvpn.net/index.php/open-source/documentation/howto.html#security) and provide a 2nd line of defense to the TLS channel.
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
 - [DNS.WATCH DNS Servers](https://dns.watch/index)
@@ -72,5 +73,5 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 
 ## Based on:
 - https://github.com/Nyr/openvpn-install/tree/b6f0c42b5b22bd57cc7536998c7dc871ace05237
-- https://github.com/Angristan/OpenVPN-install/tree/dcac2ed01f8873a8f92a04b3ccf02cfe9a020118
+- https://github.com/Angristan/OpenVPN-install/tree/c03a55f11f501d92fbd0fecf4bf9cb3c37c14b33
 - https://github.com/dwarnaka/OpenVPN-install/tree/2854fca5952f7c413dc259f8199b44a35ae461f0
