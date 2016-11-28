@@ -1,12 +1,8 @@
 # Recommended DNS Provider
 
-Update 20/11/2016
+Update 28/11/2016
 
-## FR; LT; RO or SE
-
- - [185.121.177.177](https://servers.opennicproject.org/edit.php?srv=ns1.any.dns.opennic.glue)
- - [185.121.177.53](https://servers.opennicproject.org/edit.php?srv=ns3.any.dns.opennic.glue)
- 
-## Another one
-
-d0wn is now separated of OpenNicProject : [https://dns.d0wn.biz/](https://dns.d0wn.biz/)
+1. [https://dns.d0wn.biz/](https://dns.d0wn.biz/) (a lot of country)
+2. [https://blog.uncensoreddns.org/](https://blog.uncensoreddns.org/) (Denmark)
+3. [https://dns.watch/index](https://dns.watch/index) (Germany)
+4. [https://servers.opennicproject.org/](https://servers.opennicproject.org/) (Please use Log Anon/DNSCrypt)
