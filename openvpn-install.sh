@@ -43,7 +43,7 @@ fi
 #Build a new client
 newclient () {
 	#Generate a custom client.ovpn
-	cp /etc/openvpn/client-common.txt ~/$1.ovpn
+	cp /etc/openvpn/client-template.txt ~/$1.ovpn
 	echo "<ca>" >> ~/$1.ovpn
 	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1.ovpn
 	echo "</ca>" >> ~/$1.ovpn
@@ -64,7 +64,7 @@ newclient () {
 # and to avoid getting an IPv6.
 IP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 if [[ "$IP" = "" ]]; then
-		IP=$(wget -qO- canihazip.com/s)
+	IP=$(wget -qO- ipv4.icanhazip.com)
 fi
 
 
@@ -80,7 +80,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 		read -p "Select an option [1-4]: " option
 
 		case $option in
-			1) 
+			1)
 			echo ""
 			echo "Tell me a name for the client cert"
 			echo "Please, use one word only, no special characters"
@@ -103,9 +103,10 @@ else
 	echo "First, choose which variant of the script you want to use."
 	echo '"Fast" is secure, but "slow" is the best encryption you can get, at the cost of speed (not that slow though)'
 	echo " 1) Fast (2048 bits RSA and DH, 128 bits AES)"
-	echo " 2) Slow (4096 bits RSA and DH, 256 bits AES)"
-	while [[ $VARIANT != "1" && $VARIANT != "2" ]]; do
-		read -p "Variant [1-2]: " -e -i 2 VARIANT
+	echo " 2) Medium (3072 bits RSA and DH, 128 bits AES)"
+	echo " 3) Slow (4096 bits RSA and DH, 256 bits AES)"
+	while [[ $VARIANT != "1" && $VARIANT != "2" && $VARIANT != "3"]]; do
+		read -p "Variant [1-3]: " -e -i 2 VARIANT
 	done
 
 	echo ""
@@ -149,12 +150,6 @@ else
 
 	#INPUT MAX CONNECTIONS
 	read -p "Maximum Connections: " -e -i 5 MAXCONNS
-
-	#INPUT DEFAULT DOMAIN
-	echo ""
-	read -p "(Optional) Enter a Default Domain: " -e -i example.com DOMAIN1
-	echo ""
-	#END DEFAULT DOMAIN
 
 	echo "Input CA Parameters:"
 	#INPUT CA PARAMETERS
@@ -234,6 +229,8 @@ else
 	rm -rf ~/EasyRSA-3.0.1.tgz
 	cd /etc/openvpn/easy-rsa/
 
+	# See https://github.com/OpenVPN/easy-rsa/blob/5a429d22c78604c95813b457a8bea565a39793fa/easyrsa3/easyrsa#L1015
+
 	# If the user selected the fast, less hardened version
 	if [[ "$VARIANT" = '1' ]]; then
 		echo "set_var EASYRSA_KEY_SIZE 2048
@@ -248,9 +245,24 @@ set_var EASYRSA_REQ_OU		"$CAORG"
 set_var EASYRSA_REQ_CN		"$CACN"
 " > vars
 	fi
+	
+	# If the user selected the medium version
+	if [[ "$VARIANT" = '2' ]]; then
+		echo "set_var EASYRSA_KEY_SIZE 3072
+set_var EASYRSA_DIGEST "sha256"
+set_var EASYRSA_DN	""org""
+set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
+set_var EASYRSA_REQ_PROVINCE	"$CAPROVINCE"
+set_var EASYRSA_REQ_CITY	"$CACITY"
+set_var EASYRSA_REQ_ORG		"$CAORG"
+set_var EASYRSA_REQ_EMAIL	"$CAEMAIL"
+set_var EASYRSA_REQ_OU		"$CAORG"
+set_var EASYRSA_REQ_CN		"$CACN"
+" > vars
+	fi
 
 	# If the user selected the relatively slow, ultra hardened version
-	if [[ "$VARIANT" = '2' ]]; then
+	if [[ "$VARIANT" = '3' ]]; then
 		echo "set_var EASYRSA_KEY_SIZE 4096
 set_var EASYRSA_DIGEST "sha384"
 set_var EASYRSA_DN	""org""
@@ -307,21 +319,19 @@ tls-version-min 1.2" >> /etc/openvpn/server.conf
 		# If the user selected the fast, less hardened version
 		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/server.conf
 	elif [[ "$VARIANT" = '2' ]]; then
+		# If the user selected the medium
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA38SHA2564" >> /etc/openvpn/server.conf
+	elif [[ "$VARIANT" = '3' ]]; then
 		# If the user selected the relatively slow, hardened version
 		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/server.conf
 	fi
 
 	echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
 
-  	# DHCP OPTIONS
-	if [[ "$DOMAIN1" != "" ]]; then
-		echo "push \"dhcp-option DOMAIN $DOMAIN1\"" >> /etc/openvpn/server.conf
-		echo "push \"dhcp-option SEARCH $DOMAIN1\"" >> /etc/openvpn/server.conf
-	fi
 
 	# DNS resolvers
 	case $DNS in
-		1) 
+		1)
 		# Obtain the resolvers from resolv.conf and use them for OpenVPN
 		grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
 			echo "push \"dhcp-option DNS $line\"" >> /etc/openvpn/server.conf
@@ -461,7 +471,7 @@ verb 0" >> /etc/openvpn/server.conf
 	fi
 
 	# Try to detect a NATed connection and ask about it to potential LowEndSpirit/Scaleway users
-	EXTERNALIP=$(wget -qO- canihazip.com/s)
+	EXTERNALIP=$(wget -qO- ipv4.icanhazip.com)
 	if [[ "$IP" != "$EXTERNALIP" ]]; then
 		echo ""
 		echo "Looks like your server is behind a NAT!"
@@ -475,12 +485,12 @@ verb 0" >> /etc/openvpn/server.conf
 		fi
 	fi
 
-	# client-common.txt is created so we have a template to add further users later
-	echo "client" > /etc/openvpn/client-common.txt
+	# client-template.txt is created so we have a template to add further users later
+	echo "client" > /etc/openvpn/client-template.txt
 	if [[ "$PROTOCOL" = 'UDP' ]]; then
-		echo "proto udp" >> /etc/openvpn/client-common.txt
+		echo "proto udp" >> /etc/openvpn/client-template.txt
 	elif [[ "$PROTOCOL" = 'TCP' ]]; then
-		echo "proto tcp-client" >> /etc/openvpn/client-common.txt
+		echo "proto tcp-client" >> /etc/openvpn/client-template.txt
 	fi
 	echo "remote $IP $PORT
 dev tun
@@ -493,14 +503,17 @@ remote-cert-tls server
 cipher AES-256-CBC
 auth SHA512
 tls-version-min 1.2
-tls-client" >> /etc/openvpn/client-common.txt
+tls-client" >> /etc/openvpn/client-template.txt
 
 	if [[ "$VARIANT" = '1' ]]; then
 		# If the user selected the fast, less hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-common.txt
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-template.txt
 	elif [[ "$VARIANT" = '2' ]]; then
+		# If the user selected the medium version
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-template.txt
+	elif [[ "$VARIANT" = '3' ]]; then
 		# If the user selected the relatively slow, hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/client-common.txt
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/client-template.txt
 	fi
 
 	echo ""
