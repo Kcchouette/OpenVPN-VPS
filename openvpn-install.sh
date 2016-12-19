@@ -139,15 +139,6 @@ else
 	
 	read -p "DNS [1-8]: " -e -i 2 DNS
 
-	echo ""
-	echo "Some setups (e.g. Amazon Web Services), require use of MASQUERADE rather than SNAT"
-	echo "Which forwarding method do you want to use [if unsure, leave as default]?"
-	echo " 1) SNAT (default)"
-	echo " 2) MASQUERADE"
-	while [[ $FORWARD_TYPE != "1" && $FORWARD_TYPE != "2" ]]; do
-		read -p "Forwarding type: " -e -i 1 FORWARD_TYPE
-	done
-
 	#INPUT MAX CONNECTIONS
 	read -p "Maximum Connections: " -e -i 5 MAXCONNS
 
@@ -202,11 +193,8 @@ else
 		fi
 		# Ubuntu >= 16.04 and Debian > 8 have OpenVPN > 2.3.3 without the need of a third party repository.
 		# Then we install OpnVPN and some tools
-		apt-get install openvpn iptables openssl wget ca-certificates curl ufw nano -y
+		apt-get install openvpn iptables openssl wget ca-certificates curl nano -y
 	fi
-
-	ufw allow ssh
-	ufw enable
 
 	# Find out if the machine uses nogroup or nobody for the permissionless group
 	if grep -qs "^nogroup:" /etc/group; then
@@ -396,13 +384,9 @@ verb 0" >> /etc/openvpn/server.conf
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 
 	# Set NAT for the VPN subnet
-	if [[ "$FORWARD_TYPE" = '1' ]]; then
-		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP
-		sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
-	else
-		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
-		sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE" $RCLOCAL
-	fi
+	iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP
+	sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
+
 	if pgrep firewalld; then
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
@@ -416,16 +400,6 @@ verb 0" >> /etc/openvpn/server.conf
 		fi
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
-		if [[ "$FORWARD_TYPE" = '1' ]]; then		
-			firewall-cmd --zone=trusted --add-masquerade
-			firewall-cmd --permanent --zone=trusted --add-masquerade
-		fi
-	elif hash ufw 2>/dev/null && ufw status | grep -qw active; then
-		ufw allow $PORT/udp
-		if [[ "$FORWARD_TYPE" = '1' ]]; then
-			sed -i '1s/^/##OPENVPN_START\n*nat\n:POSTROUTING ACCEPT [0:0]\n-A POSTROUTING -s 10.8.0.0\/24 -o eth0 -j MASQUERADE\nCOMMIT\n##OPENVPN_END\n\n/' /etc/ufw/before.rules
-			sed -ie 's/^DEFAULT_FORWARD_POLICY\s*=\s*/DEFAULT_FORWARD_POLICY="ACCEPT"\n#before openvpn: /' /etc/default/ufw
-		fi
 	fi
 	if iptables -L -n | grep -qE 'REJECT|DROP'; then
 		# If iptables has at least one REJECT rule, we asume this is needed.
