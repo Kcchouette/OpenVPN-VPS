@@ -5,12 +5,12 @@ Install OpenVPN on a new VPS and some tools (nano).
 ## OpenVPN Features
 
 This fork includes the following features:
+
 - Choice for UDP or TCP (UDP is still recommended)
 - No logs
-- No comp-lzo [compression is a vector for oracle attacks, e.g. CRIME or BREACH](https://github.com/BetterCrypto/Applied-Crypto-Hardening/pull/91#issuecomment-75388575)
+- No comp-lzo as [compression is a vector for oracle attacks, e.g. CRIME or BREACH](https://github.com/BetterCrypto/Applied-Crypto-Hardening/pull/91#issuecomment-75388575)
 - Better encryption (see below)
 - Avoid DNS leak
-- UFW support
 - TLS 1.2 only
 - Strong ciphers, DH keys and certificates  keys. (see [variants](#variants))
 - AES-256-CBC and SHA-512 encryption for HMAC (instead of BF-128-CBC and SHA1)
@@ -21,7 +21,7 @@ This fork includes the following features:
 - [DNS.WATCH DNS Servers](https://dns.watch/index)
 - What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md)
 - Up-to-date OpenVPN (2.3.12) thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
-- Support for either SNAT or MASQUERADE for forwarding
+
 
 ## Variants for the OpenVPN script
 
@@ -31,17 +31,31 @@ If you're just using your VPN at home, you may choose *fast*. But if you're ofte
 
 FYI, *fast* is still more secured than default OpenVPN settings.
 
+**Note:** Both [NSA](https://cryptome.org/2016/01/CNSA-Suite-and-Quantum-Computing-FAQ.pdf) and [ANSSI](https://www.ssi.gouv.fr/uploads/2015/01/RGS_v-2-0_B1.pdf) recommend at least a 3072 bits for a future-proof key. As the size of the key will have an impact on speed, I leave the choice to use 2048, 3072 or 4096 bits RSA key. 4096 bits is what's most used and recommened today, but 3072 bits is still good.
+
+
 ### Fast (lower encryption)
 
 Features:
+
 - 2048 bits RSA private key
 - 2048 bits Diffie-Hellman key
+- 128 bits AES-GCM
+- SHA-256 RSA certificate
+
+### Medium
+
+Features:
+
+- 3072 bits RSA private key
+- 3072 bits Diffie-Hellman key
 - 128 bits AES-GCM
 - SHA-256 RSA certificate
 
 ### Slow (high encryption)
 
 Features:
+
 - 4096 bits RSA private key
 - 4096 bits Diffie-Hellman key
 - 256 bits AES-GCM
@@ -49,7 +63,8 @@ Features:
 
 ## Compatibility
 
-These scripts are made to work on these OS :
+These scripts are made to work on these OS:
+
 - Debian 8
 
 ## Installation
@@ -71,13 +86,14 @@ chmod +x openvpn-install.sh
 ```
 
 Once it ends, you should run it again to add users:
+
 ```
 ./openvpn-install.sh
 ```
 
 Then give all the `.ovpn` to your client!
 
-## Installation of OpenVPN for the client
+## Installation of openVPN for the client
 
 See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/INSTALL_OPENVPN.md)
 
@@ -91,7 +107,7 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 ### For OpenVPN
 
 - https://github.com/Nyr/openvpn-install/tree/b6f0c42b5b22bd57cc7536998c7dc871ace05237
-- https://github.com/Angristan/OpenVPN-install/tree/c03a55f11f501d92fbd0fecf4bf9cb3c37c14b33
+- https://github.com/Angristan/OpenVPN-install/tree/63ed1449de27d7513c1bb58962f29a8aa1545fcb
 - https://github.com/dwarnaka/OpenVPN-install/tree/2854fca5952f7c413dc259f8199b44a35ae461f0
 
 ### For Local DNS Resolver

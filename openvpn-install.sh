@@ -43,7 +43,7 @@ fi
 #Build a new client
 newclient () {
 	#Generate a custom client.ovpn
-	cp /etc/openvpn/client-common.txt ~/$1.ovpn
+	cp /etc/openvpn/client-template.txt ~/$1.ovpn
 	echo "<ca>" >> ~/$1.ovpn
 	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1.ovpn
 	echo "</ca>" >> ~/$1.ovpn
@@ -64,7 +64,7 @@ newclient () {
 # and to avoid getting an IPv6.
 IP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 if [[ "$IP" = "" ]]; then
-		IP=$(wget -qO- canihazip.com/s)
+	IP=$(wget -qO- ipv4.icanhazip.com)
 fi
 
 
@@ -80,7 +80,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 		read -p "Select an option [1-4]: " option
 
 		case $option in
-			1) 
+			1)
 			echo ""
 			echo "Tell me a name for the client cert"
 			echo "Please, use one word only, no special characters"
@@ -103,9 +103,10 @@ else
 	echo "First, choose which variant of the script you want to use."
 	echo '"Fast" is secure, but "slow" is the best encryption you can get, at the cost of speed (not that slow though)'
 	echo " 1) Fast (2048 bits RSA and DH, 128 bits AES)"
-	echo " 2) Slow (4096 bits RSA and DH, 256 bits AES)"
-	while [[ $VARIANT != "1" && $VARIANT != "2" ]]; do
-		read -p "Variant [1-2]: " -e -i 2 VARIANT
+	echo " 2) Medium (3072 bits RSA and DH, 128 bits AES)"
+	echo " 3) Slow (4096 bits RSA and DH, 256 bits AES)"
+	while [[ $VARIANT != "1" && $VARIANT != "2" && $VARIANT != "3"]]; do
+		read -p "Variant [1-3]: " -e -i 2 VARIANT
 	done
 
 	echo ""
@@ -138,23 +139,8 @@ else
 	
 	read -p "DNS [1-8]: " -e -i 2 DNS
 
-	echo ""
-	echo "Some setups (e.g. Amazon Web Services), require use of MASQUERADE rather than SNAT"
-	echo "Which forwarding method do you want to use [if unsure, leave as default]?"
-	echo " 1) SNAT (default)"
-	echo " 2) MASQUERADE"
-	while [[ $FORWARD_TYPE != "1" && $FORWARD_TYPE != "2" ]]; do
-		read -p "Forwarding type: " -e -i 1 FORWARD_TYPE
-	done
-
 	#INPUT MAX CONNECTIONS
 	read -p "Maximum Connections: " -e -i 5 MAXCONNS
-
-	#INPUT DEFAULT DOMAIN
-	echo ""
-	read -p "(Optional) Enter a Default Domain: " -e -i example.com DOMAIN1
-	echo ""
-	#END DEFAULT DOMAIN
 
 	echo "Input CA Parameters:"
 	#INPUT CA PARAMETERS
@@ -207,11 +193,8 @@ else
 		fi
 		# Ubuntu >= 16.04 and Debian > 8 have OpenVPN > 2.3.3 without the need of a third party repository.
 		# Then we install OpnVPN and some tools
-		apt-get install openvpn iptables openssl wget ca-certificates curl ufw nano -y
+		apt-get install openvpn iptables openssl wget ca-certificates curl nano -y
 	fi
-
-	ufw allow ssh
-	ufw enable
 
 	# Find out if the machine uses nogroup or nobody for the permissionless group
 	if grep -qs "^nogroup:" /etc/group; then
@@ -234,6 +217,8 @@ else
 	rm -rf ~/EasyRSA-3.0.1.tgz
 	cd /etc/openvpn/easy-rsa/
 
+	# See https://github.com/OpenVPN/easy-rsa/blob/5a429d22c78604c95813b457a8bea565a39793fa/easyrsa3/easyrsa#L1015
+
 	# If the user selected the fast, less hardened version
 	if [[ "$VARIANT" = '1' ]]; then
 		echo "set_var EASYRSA_KEY_SIZE 2048
@@ -248,9 +233,24 @@ set_var EASYRSA_REQ_OU		"$CAORG"
 set_var EASYRSA_REQ_CN		"$CACN"
 " > vars
 	fi
+	
+	# If the user selected the medium version
+	if [[ "$VARIANT" = '2' ]]; then
+		echo "set_var EASYRSA_KEY_SIZE 3072
+set_var EASYRSA_DIGEST "sha256"
+set_var EASYRSA_DN	""org""
+set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
+set_var EASYRSA_REQ_PROVINCE	"$CAPROVINCE"
+set_var EASYRSA_REQ_CITY	"$CACITY"
+set_var EASYRSA_REQ_ORG		"$CAORG"
+set_var EASYRSA_REQ_EMAIL	"$CAEMAIL"
+set_var EASYRSA_REQ_OU		"$CAORG"
+set_var EASYRSA_REQ_CN		"$CACN"
+" > vars
+	fi
 
 	# If the user selected the relatively slow, ultra hardened version
-	if [[ "$VARIANT" = '2' ]]; then
+	if [[ "$VARIANT" = '3' ]]; then
 		echo "set_var EASYRSA_KEY_SIZE 4096
 set_var EASYRSA_DIGEST "sha384"
 set_var EASYRSA_DN	""org""
@@ -307,21 +307,19 @@ tls-version-min 1.2" >> /etc/openvpn/server.conf
 		# If the user selected the fast, less hardened version
 		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/server.conf
 	elif [[ "$VARIANT" = '2' ]]; then
+		# If the user selected the medium
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA38SHA2564" >> /etc/openvpn/server.conf
+	elif [[ "$VARIANT" = '3' ]]; then
 		# If the user selected the relatively slow, hardened version
 		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/server.conf
 	fi
 
 	echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
 
-  	# DHCP OPTIONS
-	if [[ "$DOMAIN1" != "" ]]; then
-		echo "push \"dhcp-option DOMAIN $DOMAIN1\"" >> /etc/openvpn/server.conf
-		echo "push \"dhcp-option SEARCH $DOMAIN1\"" >> /etc/openvpn/server.conf
-	fi
 
 	# DNS resolvers
 	case $DNS in
-		1) 
+		1)
 		# Obtain the resolvers from resolv.conf and use them for OpenVPN
 		grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
 			echo "push \"dhcp-option DNS $line\"" >> /etc/openvpn/server.conf
@@ -386,13 +384,9 @@ verb 0" >> /etc/openvpn/server.conf
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 
 	# Set NAT for the VPN subnet
-	if [[ "$FORWARD_TYPE" = '1' ]]; then
-		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP
-		sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
-	else
-		iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
-		sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE" $RCLOCAL
-	fi
+	iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP
+	sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
+
 	if pgrep firewalld; then
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
@@ -406,16 +400,6 @@ verb 0" >> /etc/openvpn/server.conf
 		fi
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
-		if [[ "$FORWARD_TYPE" = '1' ]]; then		
-			firewall-cmd --zone=trusted --add-masquerade
-			firewall-cmd --permanent --zone=trusted --add-masquerade
-		fi
-	elif hash ufw 2>/dev/null && ufw status | grep -qw active; then
-		ufw allow $PORT/udp
-		if [[ "$FORWARD_TYPE" = '1' ]]; then
-			sed -i '1s/^/##OPENVPN_START\n*nat\n:POSTROUTING ACCEPT [0:0]\n-A POSTROUTING -s 10.8.0.0\/24 -o eth0 -j MASQUERADE\nCOMMIT\n##OPENVPN_END\n\n/' /etc/ufw/before.rules
-			sed -ie 's/^DEFAULT_FORWARD_POLICY\s*=\s*/DEFAULT_FORWARD_POLICY="ACCEPT"\n#before openvpn: /' /etc/default/ufw
-		fi
 	fi
 	if iptables -L -n | grep -qE 'REJECT|DROP'; then
 		# If iptables has at least one REJECT rule, we asume this is needed.
@@ -461,7 +445,7 @@ verb 0" >> /etc/openvpn/server.conf
 	fi
 
 	# Try to detect a NATed connection and ask about it to potential LowEndSpirit/Scaleway users
-	EXTERNALIP=$(wget -qO- canihazip.com/s)
+	EXTERNALIP=$(wget -qO- ipv4.icanhazip.com)
 	if [[ "$IP" != "$EXTERNALIP" ]]; then
 		echo ""
 		echo "Looks like your server is behind a NAT!"
@@ -475,12 +459,12 @@ verb 0" >> /etc/openvpn/server.conf
 		fi
 	fi
 
-	# client-common.txt is created so we have a template to add further users later
-	echo "client" > /etc/openvpn/client-common.txt
+	# client-template.txt is created so we have a template to add further users later
+	echo "client" > /etc/openvpn/client-template.txt
 	if [[ "$PROTOCOL" = 'UDP' ]]; then
-		echo "proto udp" >> /etc/openvpn/client-common.txt
+		echo "proto udp" >> /etc/openvpn/client-template.txt
 	elif [[ "$PROTOCOL" = 'TCP' ]]; then
-		echo "proto tcp-client" >> /etc/openvpn/client-common.txt
+		echo "proto tcp-client" >> /etc/openvpn/client-template.txt
 	fi
 	echo "remote $IP $PORT
 dev tun
@@ -493,14 +477,17 @@ remote-cert-tls server
 cipher AES-256-CBC
 auth SHA512
 tls-version-min 1.2
-tls-client" >> /etc/openvpn/client-common.txt
+tls-client" >> /etc/openvpn/client-template.txt
 
 	if [[ "$VARIANT" = '1' ]]; then
 		# If the user selected the fast, less hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-common.txt
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-template.txt
 	elif [[ "$VARIANT" = '2' ]]; then
+		# If the user selected the medium version
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-template.txt
+	elif [[ "$VARIANT" = '3' ]]; then
 		# If the user selected the relatively slow, hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/client-common.txt
+		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/client-template.txt
 	fi
 
 	echo ""
