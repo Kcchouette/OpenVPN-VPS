@@ -11,7 +11,6 @@ This fork includes the following features:
 - No comp-lzo as [compression is a vector for oracle attacks, e.g. CRIME or BREACH](https://github.com/BetterCrypto/Applied-Crypto-Hardening/pull/91#issuecomment-75388575)
 - Better encryption (see below)
 - Avoid DNS leak
-- UFW support
 - TLS 1.2 only
 - Strong ciphers, DH keys and certificates  keys. (see [variants](#variants))
 - AES-256-CBC and SHA-512 encryption for HMAC (instead of BF-128-CBC and SHA1)
@@ -22,7 +21,6 @@ This fork includes the following features:
 - [DNS.WATCH DNS Servers](https://dns.watch/index)
 - What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md)
 - Up-to-date OpenVPN (2.3.12) thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
-- Support for either SNAT or MASQUERADE for forwarding
 
 ## Variants
 
