@@ -1,8 +1,8 @@
 # OpenVPN-VPS
 
-Install OpenVPN on a new VPS and some tools (nano)
+Install OpenVPN on a new VPS and some tools (nano).
 
-## Fork
+## OpenVPN Features
 
 This fork includes the following features:
 
@@ -22,7 +22,8 @@ This fork includes the following features:
 - What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md)
 - Up-to-date OpenVPN (2.3.12) thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
 
-## Variants
+
+## Variants for the OpenVPN script
 
 When you lauch the script you will be asked to choose a mode. Both will work the same way, but *slow* has higher encryption settings, so it may slow down your connection and take more time to install.
 
@@ -62,11 +63,17 @@ Features:
 
 ## Compatibility
 
-The script is made to work on these OS :
+These scripts are made to work on these OS:
 
 - Debian 8
 
 ## Installation
+
+### Local DNS Resolver
+
+TODO
+
+### OpenVPN
 
 **You have to enable the TUN module otherwise OpenVPN won't work.** If the TUN module is not enabled, the script will tell you. Ask your host if you don't know how to do it.
 
@@ -97,6 +104,13 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 
 ## Based on:
 
+### For OpenVPN
+
 - https://github.com/Nyr/openvpn-install/tree/b6f0c42b5b22bd57cc7536998c7dc871ace05237
 - https://github.com/Angristan/OpenVPN-install/tree/63ed1449de27d7513c1bb58962f29a8aa1545fcb
 - https://github.com/dwarnaka/OpenVPN-install/tree/2854fca5952f7c413dc259f8199b44a35ae461f0
+
+### For Local DNS Resolver
+
+- https://github.com/Angristan/Local-DNS-resolver/blob/edb50ef6538fc7a41b613fe47bd28e64bc21dfd1/debian-ubuntu-unbound.sh
+- https://github.com/yolateng0/OpenVPN-install/tree/2c9701d477ca983fd7287ee975f80589139f22f5
