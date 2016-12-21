@@ -99,15 +99,6 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 else
 	clear # OpenVPN setup and first user creation
 	echo 'Welcome to this quick OpenVPN installer'
-	echo ""
-	echo "First, choose which variant of the script you want to use."
-	echo '"Fast" is secure, but "slow" is the best encryption you can get, at the cost of speed (not that slow though)'
-	echo " 1) Fast (2048 bits RSA and DH, 128 bits AES)"
-	echo " 2) Medium (3072 bits RSA and DH, 128 bits AES)"
-	echo " 3) Slow (4096 bits RSA and DH, 256 bits AES)"
-	while [[ $VARIANT != "1" && $VARIANT != "2" && $VARIANT != "3"]]; do
-		read -p "Variant [1-3]: " -e -i 2 VARIANT
-	done
 
 	echo ""
 	echo "I need to know the IPv4 address of the network interface you want OpenVPN listening to."
@@ -130,16 +121,59 @@ else
 	echo "What DNS do you want to use with the VPN?"
 	echo " 1) Current system resolvers"
 	echo " 2) FDN (France)"
-	echo " 3) OpenNIC"
+	echo " 3) OpenNIC (the nearest)"
 	echo " 4) DNS.WATCH (Germany)"
-	echo " 5) UncensoredDNS"
+	echo " 5) UncensoredDNS (Denmark)"
 	echo " 6) OpenDNS"
 	echo " 7) Google"
 	echo " 8) Enter 2 other DNS (recommended)"
 	
-	read -p "DNS [1-8]: " -e -i 2 DNS
+	read -p "DNS [1-8]: " -e -i 8 DNS
 
-	#INPUT MAX CONNECTIONS
+	echo "Choose which cipher you want to use for the data channel:"
+	echo "   1) AES-128-CBC + AES-128-GCM-SHA256 (fastest)"
+	echo "   2) AES-192-CBC + AES-256-CBC-SHA256 (recommended, best compromise)"
+	echo "   3) AES-256-CBC + AES-256-GCM-SHA384 (most secure)"
+	while [[ $CIPHER != "1" && $CIPHER != "2" && $CIPHER != "3" ]]; do
+		read -p "Cipher [1-3]: " -e -i 2 CIPHER
+	done
+	case $CIPHER in
+		1)
+		CIPHER="cipher AES-128-CBC"
+		TLSCIPHER="TLS-DHE-RSA-WITH-AES-128-GCM-SHA256"
+		RSA_DIGEST="sha256"
+		;;
+		2)
+		CIPHER="cipher AES-192-CBC"
+		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-CBC-SHA256"
+		RSA_DIGEST="sha256"
+		;;
+		3)
+		CIPHER="cipher AES-256-CBC"
+		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-GCM-SHA384"
+		RSA_DIGEST="sha384"
+		;;
+	esac
+
+	echo "Choose what size of Diffie-Hellman/RSA key you want to use:"
+	echo "   1) 2048 bits (fastest)"
+	echo "   2) 3072 bits (recommended, best compromise)"
+	echo "   3) 4096 bits (most secure)"
+	while [[ $KEY_SIZE != "1" && $KEY_SIZE != "2" && $KEY_SIZE != "3" ]]; do
+		read -p "Key size [1-3]: " -e -i 2 KEY_SIZE
+	done
+	case $KEY_SIZE in
+		1)
+		KEY_SIZE="2048"
+		;;
+		2)
+		KEY_SIZE="3072"
+		;;
+		3)
+		KEY_SIZE="4096"
+		;;
+	esac
+
 	read -p "Maximum Connections: " -e -i 5 MAXCONNS
 
 	echo "Input CA Parameters:"
@@ -218,12 +252,9 @@ else
 	cd /etc/openvpn/easy-rsa/
 
 	# See https://github.com/OpenVPN/easy-rsa/blob/5a429d22c78604c95813b457a8bea565a39793fa/easyrsa3/easyrsa#L1015
-
-	# If the user selected the fast, less hardened version
-	if [[ "$VARIANT" = '1' ]]; then
-		echo "set_var EASYRSA_KEY_SIZE 2048
-set_var EASYRSA_DIGEST "sha256"
-set_var EASYRSA_DN	""org""
+	echo "set_var EASYRSA_KEY_SIZE $KEY_SIZE
+set_var EASYRSA_DIGEST		"sha256"
+set_var EASYRSA_DN		""org""
 set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
 set_var EASYRSA_REQ_PROVINCE	"$CAPROVINCE"
 set_var EASYRSA_REQ_CITY	"$CACITY"
@@ -231,36 +262,8 @@ set_var EASYRSA_REQ_ORG		"$CAORG"
 set_var EASYRSA_REQ_EMAIL	"$CAEMAIL"
 set_var EASYRSA_REQ_OU		"$CAORG"
 set_var EASYRSA_REQ_CN		"$CACN"
-" > vars
-	fi
-	
-	# If the user selected the medium version
-	if [[ "$VARIANT" = '2' ]]; then
-		echo "set_var EASYRSA_KEY_SIZE 3072
-set_var EASYRSA_DIGEST "sha256"
-set_var EASYRSA_DN	""org""
-set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
-set_var EASYRSA_REQ_PROVINCE	"$CAPROVINCE"
-set_var EASYRSA_REQ_CITY	"$CACITY"
-set_var EASYRSA_REQ_ORG		"$CAORG"
-set_var EASYRSA_REQ_EMAIL	"$CAEMAIL"
-set_var EASYRSA_REQ_OU		"$CAORG"
-set_var EASYRSA_REQ_CN		"$CACN"
-" > vars
-	fi
-
-	# If the user selected the relatively slow, ultra hardened version
-	if [[ "$VARIANT" = '3' ]]; then
-		echo "set_var EASYRSA_KEY_SIZE 4096
-set_var EASYRSA_DIGEST "sha384"
-set_var EASYRSA_DN	""org""
-set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
-set_var EASYRSA_REQ_PROVINCE	"$CAPROVINCE"
-set_var EASYRSA_REQ_CITY	"$CACITY"
-set_var EASYRSA_REQ_ORG		"$CAORG"
-set_var EASYRSA_REQ_EMAIL	"$CAEMAIL"
-set_var EASYRSA_REQ_OU		"$CAORG"
-set_var EASYRSA_REQ_CN		"$CACN"
+set_var EASYRSA_CA_EXPIRE	"365"
+set_var EASYRSA_CERT_EXPIRE	"365"
 " > vars
 	fi
 
@@ -301,18 +304,8 @@ server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
 cipher AES-256-CBC
 auth SHA512
-tls-version-min 1.2" >> /etc/openvpn/server.conf
-
-	if [[ "$VARIANT" = '1' ]]; then
-		# If the user selected the fast, less hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/server.conf
-	elif [[ "$VARIANT" = '2' ]]; then
-		# If the user selected the medium
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA38SHA2564" >> /etc/openvpn/server.conf
-	elif [[ "$VARIANT" = '3' ]]; then
-		# If the user selected the relatively slow, hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/server.conf
-	fi
+tls-version-min 1.2
+tls-cipher $TLSCIPHER" >> /etc/openvpn/server.conf
 
 	echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
 
@@ -474,21 +467,11 @@ persist-key
 persist-tun
 setenv opt block-outside-dns
 remote-cert-tls server
-cipher AES-256-CBC
+cipher $CIPHER
 auth SHA512
 tls-version-min 1.2
-tls-client" >> /etc/openvpn/client-template.txt
-
-	if [[ "$VARIANT" = '1' ]]; then
-		# If the user selected the fast, less hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-template.txt
-	elif [[ "$VARIANT" = '2' ]]; then
-		# If the user selected the medium version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256" >> /etc/openvpn/client-template.txt
-	elif [[ "$VARIANT" = '3' ]]; then
-		# If the user selected the relatively slow, hardened version
-		echo "tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384" >> /etc/openvpn/client-template.txt
-	fi
+tls-client
+tls-cipher $TLSCIPHER" >> /etc/openvpn/client-template.txt
 
 	echo ""
 	echo "Finished!"
