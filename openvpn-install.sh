@@ -75,14 +75,14 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 		echo "Looks like OpenVPN is already installed"
 		echo ""
 		echo "What do you want to do?"
-		echo " 1) Add a cert for a new user"
+		echo " 1) Create a config file for an user"
 		echo " 4) Exit"
 		read -p "Select an option [1-4]: " option
 
 		case $option in
 			1)
 			echo ""
-			echo "Tell me a name for the client cert"
+			echo "Tell me a name for the client config file"
 			echo "Please, use one word only, no special characters"
 			read -p "Client name: " -e -i client CLIENT
 			cd /etc/openvpn/easy-rsa/
@@ -90,7 +90,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			# Generates the custom client.ovpn
 			newclient "$CLIENT"
 			echo ""
-			echo "Client $CLIENT added, certs available at ~/$CLIENT.ovpn"
+			echo "Client $CLIENT added, config file available at ~/$CLIENT.ovpn"
 			exit
 			;;
 			4) exit;;
@@ -130,32 +130,26 @@ else
 	
 	read -p "DNS [1-8]: " -e -i 8 DNS
 
-	echo "Choose which cipher you want to use for the data channel:"
-	echo "   1) AES-128-CBC + AES-128-GCM-SHA256 (fastest)"
-	echo "   2) AES-192-CBC + AES-256-CBC-SHA256 (recommended, best compromise)"
-	echo "   3) AES-256-CBC + AES-256-GCM-SHA384 (most secure)"
-	while [[ $CIPHER != "1" && $CIPHER != "2" && $CIPHER != "3" ]]; do
-		read -p "Cipher [1-3]: " -e -i 2 CIPHER
+	echo "Choose which RSA Digest you want tu use to authentificate ssl connection
+	echo "   1) sha-256 (fastest, recommended)"
+	echo "   2) sha-384"
+	echo "   3) sha512 (most secure)"
+	while [[ $RSA_DIGEST != "1" && $RSA_DIGEST != "2" && $RSA_DIGEST != "3" ]]; do
+		read -p "RSA Digest [1-3]: " -e -i 2 RSA_DIGEST
 	done
-	case $CIPHER in
+	case $RSA_DIGEST in
 		1)
-		CIPHER="cipher AES-128-CBC"
-		TLSCIPHER="TLS-DHE-RSA-WITH-AES-128-GCM-SHA256"
 		RSA_DIGEST="sha256"
 		;;
 		2)
-		CIPHER="cipher AES-192-CBC"
-		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-CBC-SHA256"
-		RSA_DIGEST="sha256"
-		;;
-		3)
-		CIPHER="cipher AES-256-CBC"
-		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-GCM-SHA384"
 		RSA_DIGEST="sha384"
 		;;
-	esac
+		3)
+		RSA_DIGEST="sha512"
+		;;
+	esac	
 
-	echo "Choose what size of Diffie-Hellman/RSA key you want to use:"
+	echo "Choose what size of Diffie-Hellman/RSA certficiates/keys you want to use:"
 	echo "   1) 2048 bits (fastest)"
 	echo "   2) 3072 bits (recommended, best compromise)"
 	echo "   3) 4096 bits (most secure)"
@@ -171,6 +165,44 @@ else
 		;;
 		3)
 		KEY_SIZE="4096"
+		;;
+	esac
+
+	echo "Choose which cipher you want to use for the control channel:"
+	echo "   1) TLS-DHE-RSA-WITH-AES-128-GCM-SHA256 (fastest)"
+	echo "   2) TLS-DHE-RSA-WITH-AES-256-CBC-SHA256 (recommended, best compromise)"
+	echo "   3) TLS-DHE-RSA-WITH-AES-256-GCM-SHA384 (most secure)"
+	while [[ $TLSCIPHER != "1" && $TLSCIPHER != "2" && $TLSCIPHER != "3" ]]; do
+		read -p "TLS Cipher [1-3]: " -e -i 2 TLSCIPHER
+	done
+	case $TLSCIPHER in
+		1)
+		TLSCIPHER="TLS-DHE-RSA-WITH-AES-128-GCM-SHA256"
+		;;
+		2)
+		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-CBC-SHA256"
+		;;
+		3)
+		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-GCM-SHA384"
+		;;
+	esac
+
+	echo "Choose which cipher you want to use for the data channel:"
+	echo "   1) AES-128-CBC (fastest)"
+	echo "   2) AES-192-CBC (recommended, best compromise)"
+	echo "   3) AES-256-CBC (most secure)"
+	while [[ $CIPHER != "1" && $CIPHER != "2" && $CIPHER != "3" ]]; do
+		read -p "Cipher [1-3]: " -e -i 2 CIPHER
+	done
+	case $CIPHER in
+		1)
+		CIPHER="AES-128-CBC"
+		;;
+		2)
+		CIPHER="AES-192-CBC"
+		;;
+		3)
+		CIPHER="AES-256-CBC"
 		;;
 	esac
 
@@ -253,7 +285,7 @@ else
 
 	# See https://github.com/OpenVPN/easy-rsa/blob/5a429d22c78604c95813b457a8bea565a39793fa/easyrsa3/easyrsa#L1015
 	echo "set_var EASYRSA_KEY_SIZE $KEY_SIZE
-set_var EASYRSA_DIGEST		"sha256"
+set_var EASYRSA_DIGEST		$RSA_DIGEST
 set_var EASYRSA_DN		""org""
 set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
 set_var EASYRSA_REQ_PROVINCE	"$CAPROVINCE"
@@ -302,7 +334,7 @@ group $NOGROUP
 topology subnet
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
-cipher AES-256-CBC
+cipher $CIPHER
 auth SHA512
 tls-version-min 1.2
 tls-cipher $TLSCIPHER" >> /etc/openvpn/server.conf
