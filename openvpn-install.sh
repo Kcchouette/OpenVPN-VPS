@@ -76,6 +76,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 		echo ""
 		echo "What do you want to do?"
 		echo " 1) Create a config file for an user"
+		echo " 2) Revoke existing user cert"
 		echo " 4) Exit"
 		read -p "Select an option [1-4]: " option
 
@@ -91,6 +92,37 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			newclient "$CLIENT"
 			echo ""
 			echo "Client $CLIENT added, config file available at ~/$CLIENT.ovpn"
+			exit
+			;;
+			2)
+			NUMBEROFCLIENTS=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep -c "^V")
+			if [[ "$NUMBEROFCLIENTS" = '0' ]]; then
+				echo ""
+				echo "You have no existing clients!"
+				exit 6
+			fi
+			echo ""
+			echo "Select the existing client certificate you want to revoke"
+			tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | nl -s ') '
+			if [[ "$NUMBEROFCLIENTS" = '1' ]]; then
+				read -p "Select one client [1]: " CLIENTNUMBER
+			else
+				read -p "Select one client [1-$NUMBEROFCLIENTS]: " CLIENTNUMBER
+			fi
+			CLIENT=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | sed -n "$CLIENTNUMBER"p)
+			cd /etc/openvpn/easy-rsa/
+			./easyrsa --batch revoke $CLIENT
+			./easyrsa gen-crl
+			rm -rf pki/reqs/$CLIENT.req
+			rm -rf pki/private/$CLIENT.key
+			rm -rf pki/issued/$CLIENT.crt
+			rm -rf /etc/openvpn/crl.pem
+			cp /etc/openvpn/easy-rsa/pki/crl.pem /etc/openvpn/crl.pem
+			# CRL is read with each client connection, when OpenVPN is dropped to nobody
+			chown nobody:$GROUPNAME /etc/openvpn/crl.pem
+			echo ""
+			echo "Certificate for client $CLIENT revoked"
+			echo "Exiting..."
 			exit
 			;;
 			4) exit;;
@@ -510,3 +542,4 @@ tls-cipher $TLSCIPHER" >> /etc/openvpn/client-template.txt
 	echo ""
 	echo "If you want to add clients, you simply need to run this script another time!"
 fi
+exit 0;
