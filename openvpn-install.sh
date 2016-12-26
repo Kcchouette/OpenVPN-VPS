@@ -42,21 +42,37 @@ fi
 
 #Build a new client
 newclient () {
-	#Generate a custom client.ovpn
-	cp /etc/openvpn/client-template.txt ~/$1.ovpn
-	echo "<ca>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1.ovpn
-	echo "</ca>" >> ~/$1.ovpn
-	echo "<cert>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/issued/$1.crt >> ~/$1.ovpn
-	echo "</cert>" >> ~/$1.ovpn
-	echo "<key>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1.ovpn
-	echo "</key>" >> ~/$1.ovpn
-	echo "key-direction 1" >> ~/$1.ovpn
-	echo "<tls-auth>" >> ~/$1.ovpn
-	cat /etc/openvpn/tls-auth.key >> ~/$1.ovpn
-	echo "</tls-auth>" >> ~/$1.ovpn
+	#Generate a custom client_udp.ovpn
+	cp /etc/openvpn/client-template_udp.txt ~/$1_udp.ovpn
+	echo "<ca>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1_udp.ovpn
+	echo "</ca>" >> ~/$1_udp.ovpn
+	echo "<cert>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/issued/$1.crt >> ~/$1_udp.ovpn
+	echo "</cert>" >> ~/$1_udp.ovpn
+	echo "<key>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1_udp.ovpn
+	echo "</key>" >> ~/$1_udp.ovpn
+	echo "key-direction 1" >> ~/$1_udp.ovpn
+	echo "<tls-auth>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/tls-auth.key >> ~/$1_udp.ovpn
+	echo "</tls-auth>" >> ~/$1_udp.ovpn
+	
+	#same for tcp
+	cp /etc/openvpn/client-template_tcp.txt ~/$1_tcp.ovpn
+	echo "<ca>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1_tcp.ovpn
+	echo "</ca>" >> ~/$1_tcp.ovpn
+	echo "<cert>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/issued/$1.crt >> ~/$1_tcp.ovpn
+	echo "</cert>" >> ~/$1_tcp.ovpn
+	echo "<key>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1_tcp.ovpn
+	echo "</key>" >> ~/$1_tcp.ovpn
+	echo "key-direction 1" >> ~/$1_tcp.ovpn
+	echo "<tls-auth>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/tls-auth.key >> ~/$1_tcp.ovpn
+	echo "</tls-auth>" >> ~/$1_tcp.ovpn
 }
 
 # Try to get our IP from the system and fallback to the Internet.
@@ -68,7 +84,7 @@ if [[ "$IP" = "" ]]; then
 fi
 
 
-if [[ -e /etc/openvpn/server.conf ]]; then
+if [[ -e /etc/openvpn/server_udp.conf ]] || [[ -e /etc/openvpn/server_tcp.conf ]] then
 	while :
 	do
 	clear
@@ -348,14 +364,7 @@ set_var EASYRSA_CERT_EXPIRE	"365"
 	chmod 644 /etc/openvpn/crl.pem
 
 	# Generate server.conf
-	echo "port $PORT" > /etc/openvpn/server.conf
-	if [[ "$PROTOCOL" = 'UDP' ]]; then
-		echo "proto udp" >> /etc/openvpn/server.conf
-	elif [[ "$PROTOCOL" = 'TCP' ]]; then
-		echo "proto tcp" >> /etc/openvpn/server.conf
-	fi
 	echo "dev tun
-dev tun
 max-clients $MAXCONNS
 ca ca.crt
 cert server.crt
@@ -369,10 +378,9 @@ ifconfig-pool-persist ipp.txt
 cipher $CIPHER
 auth SHA512
 tls-version-min 1.2
-tls-cipher $TLSCIPHER" >> /etc/openvpn/server.conf
+tls-cipher $TLSCIPHER" > /etc/openvpn/server.conf
 
 	echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
-
 
 	# DNS resolvers
 	case $DNS in
@@ -425,6 +433,14 @@ tls-server
 tls-auth tls-auth.key 0
 verb 0" >> /etc/openvpn/server.conf
 
+echo "port $PORT
+proto udp" | cat - /etc/openvpn/server.conf > /etc/openvpn/server_udp.conf
+	
+echo "port 443
+proto tcp" | cat - /etc/openvpn/server.conf > /etc/openvpn/server_tcp.conf
+
+rm /etc/openvpn/server.conf
+
 
 	# Create the sysctl configuration file if needed (mainly for Arch Linux)
 	if [[ ! -e $SYSCTL ]]; then
@@ -448,13 +464,13 @@ verb 0" >> /etc/openvpn/server.conf
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
 		# avoid a firewalld reload.
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
-			firewall-cmd --zone=public --add-port=$PORT/udp
-			firewall-cmd --permanent --zone=public --add-port=$PORT/udp
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
-			firewall-cmd --zone=public --add-port=$PORT/tcp
-			firewall-cmd --permanent --zone=public --add-port=$PORT/tcp
-		fi
+
+		firewall-cmd --zone=public --add-port=$PORT/udp
+		firewall-cmd --permanent --zone=public --add-port=$PORT/udp
+
+		firewall-cmd --zone=public --add-port=443/tcp
+		firewall-cmd --permanent --zone=public --add-port=443/tcp
+
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
 	fi
@@ -462,18 +478,13 @@ verb 0" >> /etc/openvpn/server.conf
 		# If iptables has at least one REJECT rule, we asume this is needed.
 		# Not the best approach but I can't think of other and this shouldn't
 		# cause problems.
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
-			iptables -I INPUT -p udp --dport $PORT -j ACCEPT
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
-			iptables -I INPUT -p tcp --dport $PORT -j ACCEPT
-		fi
+		iptables -I INPUT -p udp --dport $PORT -j ACCEPT
+		iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+
 		iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
 			sed -i "1 a\iptables -I INPUT -p udp --dport $PORT -j ACCEPT" $RCLOCAL
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
-			sed -i "1 a\iptables -I INPUT -p tcp --dport $PORT -j ACCEPT" $RCLOCAL
-		fi
+			sed -i "1 a\iptables -I INPUT -p tcp --dport 443 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" $RCLOCAL
 	fi
@@ -482,11 +493,8 @@ verb 0" >> /etc/openvpn/server.conf
 	if hash sestatus 2>/dev/null; then
 		if sestatus | grep "Current mode" | grep -qs "enforcing"; then
 			if [[ "$PORT" != '1194' ]]; then
-				if [[ "$PROTOCOL" = 'UDP' ]]; then
-					semanage port -a -t openvpn_port_t -p udp $PORT
-				elif [[ "$PROTOCOL" = 'TCP' ]]; then
-					semanage port -a -t openvpn_port_t -p tcp $PORT
-				fi
+				semanage port -a -t openvpn_port_t -p udp $PORT
+				semanage port -a -t openvpn_port_t -p tcp 443
 			fi
 		fi
 	fi
@@ -517,14 +525,7 @@ verb 0" >> /etc/openvpn/server.conf
 	fi
 
 	# client-template.txt is created so we have a template to add further users later
-	echo "client" > /etc/openvpn/client-template.txt
-	if [[ "$PROTOCOL" = 'UDP' ]]; then
-		echo "proto udp" >> /etc/openvpn/client-template.txt
-	elif [[ "$PROTOCOL" = 'TCP' ]]; then
-		echo "proto tcp-client" >> /etc/openvpn/client-template.txt
-	fi
-	echo "remote $IP $PORT
-dev tun
+	echo "dev tun
 resolv-retry infinite
 nobind
 persist-key
@@ -535,7 +536,15 @@ cipher $CIPHER
 auth SHA512
 tls-version-min 1.2
 tls-client
-tls-cipher $TLSCIPHER" >> /etc/openvpn/client-template.txt
+tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt
+
+	echo "client
+	proto udp
+	remote $IP $PORT" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_udp.txt
+	
+	echo "client
+	proto tcp
+	remote $IP 443" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_tcp.txt
 
 	echo ""
 	echo "Finished!"
