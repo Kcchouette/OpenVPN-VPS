@@ -178,7 +178,7 @@ else
 	
 	read -p "DNS [1-8]: " -e -i 8 DNS
 
-	echo "Choose which RSA Digest you want tu use to authentificate ssl connection
+	echo "Choose which RSA Digest you want tu use to authentificate ssl connection"
 	echo "   1) sha-256 (fastest, recommended)"
 	echo "   2) sha-384"
 	echo "   3) sha512 (most secure)"
@@ -503,7 +503,8 @@ rm /etc/openvpn/server.conf
 	if [[ "$OS" = 'debian' ]]; then
 		# Little hack to check for systemd
 		if pgrep systemd-journal; then
-			systemctl restart openvpn@server.service
+			systemctl restart openvpn@server_tcp.service
+			systemctl restart openvpn@server_udp.service
 		else
 			/etc/init.d/openvpn restart
 		fi
@@ -551,4 +552,3 @@ tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt
 	echo ""
 	echo "If you want to add clients, you simply need to run this script another time!"
 fi
-exit 0;
