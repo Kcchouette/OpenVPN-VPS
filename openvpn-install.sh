@@ -84,7 +84,7 @@ if [[ "$IP" = "" ]]; then
 fi
 
 
-if [[ -e /etc/openvpn/server_udp.conf ]] || [[ -e /etc/openvpn/server_tcp.conf ]] then
+if [[ -e /etc/openvpn/server_udp.conf ]] || [[ -e /etc/openvpn/server_tcp.conf ]]; then
 	while :
 	do
 	clear
