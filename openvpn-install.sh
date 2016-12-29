@@ -162,7 +162,7 @@ else
 	
 	read -p "DNS [1-8]: " -e -i 8 DNS
 
-	echo "Choose which RSA Digest you want tu use to authentificate ssl connection
+	echo "Choose which RSA Digest you want tu use to authentificate ssl connection"
 	echo "   1) sha-256 (fastest, recommended)"
 	echo "   2) sha-384"
 	echo "   3) sha512 (most secure)"
@@ -355,7 +355,6 @@ set_var EASYRSA_CERT_EXPIRE	"365"
 		echo "proto tcp" >> /etc/openvpn/server.conf
 	fi
 	echo "dev tun
-dev tun
 max-clients $MAXCONNS
 ca ca.crt
 cert server.crt
@@ -542,4 +541,3 @@ tls-cipher $TLSCIPHER" >> /etc/openvpn/client-template.txt
 	echo ""
 	echo "If you want to add clients, you simply need to run this script another time!"
 fi
-exit 0;
