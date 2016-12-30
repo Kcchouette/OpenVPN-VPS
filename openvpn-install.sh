@@ -329,7 +329,6 @@ set_var EASYRSA_REQ_CN		"$CACN"
 set_var EASYRSA_CA_EXPIRE	"365"
 set_var EASYRSA_CERT_EXPIRE	"365"
 " > vars
-	fi
 
 	# Create the PKI, set up the CA, the DH params and the server certificate
 	./easyrsa init-pki
