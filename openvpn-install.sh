@@ -137,12 +137,12 @@ else
 	echo "If your server is running behind a NAT, (e.g. LowEndSpirit, Scaleway) leave the IP address as it is. (local/private IP)"
 	echo "Otherwise, it should be your public IPv4 address."
 	read -p "IP address: " -e -i $IP IP
-
-	echo "What protocol do you want for OpenVPN?"
-	echo "Unless UDP is blocked, you should not use TCP (unnecessarily slower)"
-	while [[ $PROTOCOL != "UDP" && $PROTOCOL != "TCP" ]]; do
-		read -p "Protocol [UDP/TCP]: " -e -i UDP PROTOCOL
-	done
+	echo ""
+	
+	echo "Which protocol do you want for OpenVPN connections?"
+	echo "   1) UDP (recommended)"
+	echo "   2) TCP"
+	read -p "Protocol [1-2]: " -e -i 1 PROTOCOL
 	echo ""
 
 	echo ""
@@ -150,7 +150,7 @@ else
 	read -p "Port: " -e -i 1194 PORT
 
 	echo ""
-	echo "What DNS do you want to use with the VPN?"
+	echo "Which DNS do you want to use with the VPN?"
 	echo " 1) Current system resolvers"
 	echo " 2) FDN (France)"
 	echo " 3) OpenNIC (the nearest)"
@@ -348,11 +348,14 @@ set_var EASYRSA_CERT_EXPIRE	"365"
 
 	# Generate server.conf
 	echo "port $PORT" > /etc/openvpn/server.conf
-	if [[ "$PROTOCOL" = 'UDP' ]]; then
+	case $PROTOCOL in
+		1)
 		echo "proto udp" >> /etc/openvpn/server.conf
-	elif [[ "$PROTOCOL" = 'TCP' ]]; then
+		;;
+		2)
 		echo "proto tcp" >> /etc/openvpn/server.conf
-	fi
+		;;
+	esac
 	echo "dev tun
 max-clients $MAXCONNS
 ca ca.crt
@@ -446,13 +449,16 @@ verb 0" >> /etc/openvpn/server.conf
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
 		# avoid a firewalld reload.
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
+		case $PROTOCOL in
+			1)
 			firewall-cmd --zone=public --add-port=$PORT/udp
 			firewall-cmd --permanent --zone=public --add-port=$PORT/udp
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
+			;;
+			2)
 			firewall-cmd --zone=public --add-port=$PORT/tcp
 			firewall-cmd --permanent --zone=public --add-port=$PORT/tcp
-		fi
+			;;
+		esac
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
 	fi
@@ -460,18 +466,24 @@ verb 0" >> /etc/openvpn/server.conf
 		# If iptables has at least one REJECT rule, we asume this is needed.
 		# Not the best approach but I can't think of other and this shouldn't
 		# cause problems.
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
+		case $PROTOCOL in
+			1)
 			iptables -I INPUT -p udp --dport $PORT -j ACCEPT
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
+			;;
+			2)
 			iptables -I INPUT -p tcp --dport $PORT -j ACCEPT
-		fi
+			;;
+		esac
 		iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
+		case $PROTOCOL in
+			1)
 			sed -i "1 a\iptables -I INPUT -p udp --dport $PORT -j ACCEPT" $RCLOCAL
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
+			;;
+			2)
 			sed -i "1 a\iptables -I INPUT -p tcp --dport $PORT -j ACCEPT" $RCLOCAL
-		fi
+			;;
+		esac
 		sed -i "1 a\iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" $RCLOCAL
 	fi
@@ -480,11 +492,14 @@ verb 0" >> /etc/openvpn/server.conf
 	if hash sestatus 2>/dev/null; then
 		if sestatus | grep "Current mode" | grep -qs "enforcing"; then
 			if [[ "$PORT" != '1194' ]]; then
-				if [[ "$PROTOCOL" = 'UDP' ]]; then
+				case $PROTOCOL in
+					1)
 					semanage port -a -t openvpn_port_t -p udp $PORT
-				elif [[ "$PROTOCOL" = 'TCP' ]]; then
+					;;
+					2)
 					semanage port -a -t openvpn_port_t -p tcp $PORT
-				fi
+					;;
+				esac
 			fi
 		fi
 	fi
@@ -515,14 +530,17 @@ verb 0" >> /etc/openvpn/server.conf
 	fi
 
 	# client-template.txt is created so we have a template to add further users later
-	echo "client" > /etc/openvpn/client-template.txt
-	if [[ "$PROTOCOL" = 'UDP' ]]; then
+	echo "client
+dev tun" > /etc/openvpn/client-template.txt
+	case $PROTOCOL in
+		1)
 		echo "proto udp" >> /etc/openvpn/client-template.txt
-	elif [[ "$PROTOCOL" = 'TCP' ]]; then
-		echo "proto tcp-client" >> /etc/openvpn/client-template.txt
-	fi
+		;;
+		2)
+		echo "proto tcp" >> /etc/openvpn/client-template.txt
+		;;
+	esac
 	echo "remote $IP $PORT
-dev tun
 resolv-retry infinite
 nobind
 persist-key
