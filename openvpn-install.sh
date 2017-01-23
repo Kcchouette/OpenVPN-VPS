@@ -144,6 +144,14 @@ else
 	echo "   2) TCP"
 	read -p "Protocol [1-2]: " -e -i 1 PROTOCOL
 	echo ""
+	case $PROTOCOL in
+		1) 
+		PROTOCOL=udp
+		;;
+		2) 
+		PROTOCOL=tcp
+		;;
+	esac
 
 	echo ""
 	echo "What port do you want for OpenVPN?"
@@ -347,16 +355,9 @@ set_var EASYRSA_CERT_EXPIRE	"365"
 	chmod 644 /etc/openvpn/crl.pem
 
 	# Generate server.conf
-	echo "port $PORT" > /etc/openvpn/server.conf
-	case $PROTOCOL in
-		1)
-		echo "proto udp" >> /etc/openvpn/server.conf
-		;;
-		2)
-		echo "proto tcp" >> /etc/openvpn/server.conf
-		;;
-	esac
-	echo "dev tun
+	echo "port $PORT
+proto $PROTOCOL
+dev tun
 max-clients $MAXCONNS
 ca ca.crt
 cert server.crt
@@ -370,7 +371,7 @@ ifconfig-pool-persist ipp.txt
 cipher $CIPHER
 auth SHA512
 tls-version-min 1.2
-tls-cipher $TLSCIPHER" >> /etc/openvpn/server.conf
+tls-cipher $TLSCIPHER" > /etc/openvpn/server.conf
 
 	echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
 
@@ -449,16 +450,9 @@ verb 0" >> /etc/openvpn/server.conf
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
 		# avoid a firewalld reload.
-		case $PROTOCOL in
-			1)
-			firewall-cmd --zone=public --add-port=$PORT/udp
-			firewall-cmd --permanent --zone=public --add-port=$PORT/udp
-			;;
-			2)
-			firewall-cmd --zone=public --add-port=$PORT/tcp
-			firewall-cmd --permanent --zone=public --add-port=$PORT/tcp
-			;;
-		esac
+		firewall-cmd --zone=public --add-port=$PORT/$PROTOCOL
+		firewall-cmd --permanent --zone=public --add-port=$PORT/$PROTOCOL
+
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
 	fi
@@ -466,24 +460,12 @@ verb 0" >> /etc/openvpn/server.conf
 		# If iptables has at least one REJECT rule, we asume this is needed.
 		# Not the best approach but I can't think of other and this shouldn't
 		# cause problems.
-		case $PROTOCOL in
-			1)
-			iptables -I INPUT -p udp --dport $PORT -j ACCEPT
-			;;
-			2)
-			iptables -I INPUT -p tcp --dport $PORT -j ACCEPT
-			;;
-		esac
+		iptables -I INPUT -p $PROTOCOL --dport $PORT -j ACCEPT
 		iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-		case $PROTOCOL in
-			1)
-			sed -i "1 a\iptables -I INPUT -p udp --dport $PORT -j ACCEPT" $RCLOCAL
-			;;
-			2)
-			sed -i "1 a\iptables -I INPUT -p tcp --dport $PORT -j ACCEPT" $RCLOCAL
-			;;
-		esac
+		
+		sed -i "1 a\iptables -I INPUT -p $PROTOCOL --dport $PORT -j ACCEPT" $RCLOCAL
+
 		sed -i "1 a\iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" $RCLOCAL
 	fi
@@ -491,15 +473,8 @@ verb 0" >> /etc/openvpn/server.conf
 	# If SELinux is enabled and a custom port was selected, we need this
 	if hash sestatus 2>/dev/null; then
 		if sestatus | grep "Current mode" | grep -qs "enforcing"; then
-			if [[ "$PORT" != '1194' ]]; then
-				case $PROTOCOL in
-					1)
-					semanage port -a -t openvpn_port_t -p udp $PORT
-					;;
-					2)
-					semanage port -a -t openvpn_port_t -p tcp $PORT
-					;;
-				esac
+			if [[ "$PORT" != '1194' || "$PROTOCOL" = 'tcp' ]]; then
+				semanage port -a -t openvpn_port_t -p $PROTOCOL $PORT
 			fi
 		fi
 	fi
@@ -531,16 +506,9 @@ verb 0" >> /etc/openvpn/server.conf
 
 	# client-template.txt is created so we have a template to add further users later
 	echo "client
-dev tun" > /etc/openvpn/client-template.txt
-	case $PROTOCOL in
-		1)
-		echo "proto udp" >> /etc/openvpn/client-template.txt
-		;;
-		2)
-		echo "proto tcp" >> /etc/openvpn/client-template.txt
-		;;
-	esac
-	echo "remote $IP $PORT
+dev tun
+proto $PROTOCOL
+remote $IP $PORT
 resolv-retry infinite
 nobind
 persist-key
@@ -551,7 +519,7 @@ cipher $CIPHER
 auth SHA512
 tls-version-min 1.2
 tls-client
-tls-cipher $TLSCIPHER" >> /etc/openvpn/client-template.txt
+tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt
 
 	echo ""
 	echo "Finished!"
