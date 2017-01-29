@@ -43,7 +43,7 @@ The script is made to work on these OS :
 Then download the script, run it and follow the assistant:
 
 ```
-wget https://raw.githubusercontent.com/Kcchouette/OpenVPN-VPS/master/openvpn-install.sh
+wget https://raw.githubusercontent.com/Kcchouette/OpenVPN-VPS/master/openvpn-install.sh --no-check-certificate
 chmod +x openvpn-install.sh
 ./openvpn-install.sh
 ```
