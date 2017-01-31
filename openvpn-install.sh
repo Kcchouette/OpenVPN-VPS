@@ -300,7 +300,7 @@ else
 		# Ubuntu >= 16.04 and Debian > 8 have OpenVPN > 2.3.3 without the need of a third party repository.
 		# Then we install OpnVPN and some tools
 		#apt-get update && apt-get upgrade
-		apt-get install ca-certificates openvpn iptables openssl wget ca-certificates curl nano -y
+		apt-get install ca-certificates openvpn iptables openssl wget curl nano -y
 	fi
 
 	# Find out if the machine uses nogroup or nobody for the permissionless group
