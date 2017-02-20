@@ -43,7 +43,7 @@ The script is made to work on these OS :
 Then download the script, run it and follow the assistant:
 
 ```
-wget https://raw.githubusercontent.com/Kcchouette/OpenVPN-VPS/master/openvpn-install.sh --no-check-certificate
+wget "https://raw.githubusercontent.com/Kcchouette/OpenVPN-VPS/master/openvpn-install.sh" --no-check-certificate
 chmod +x openvpn-install.sh
 ./openvpn-install.sh
 ```
@@ -67,5 +67,5 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 
 ## Based on:
 
-- https://github.com/Nyr/openvpn-install/tree/a31aaf82f3664e5854c617752a5493011ede731f
-- https://github.com/Angristan/OpenVPN-install/tree/adfb8b9a2f23545964b538601f22ebf9707270e1
+- https://github.com/Nyr/openvpn-install/tree/7d93fbf62fe632b18273eab8527770cb6f9676cb
+- https://github.com/Angristan/OpenVPN-install/tree/06c66a96a7634bc179ee948655e0e8be181a2e80
