@@ -64,7 +64,7 @@ newclient () {
 # and to avoid getting an IPv6.
 IP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 if [[ "$IP" = "" ]]; then
-	IP=$(wget -qO- ipv4.icanhazip.com)
+	IP=$(wget -4qO- "http://whatismyip.akamai.com/")
 fi
 
 
@@ -75,8 +75,8 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 		echo "Looks like OpenVPN is already installed"
 		echo ""
 		echo "What do you want to do?"
-		echo " 1) Create a config file for an user"
-		echo " 2) Revoke existing user cert"
+		echo " 1) Create a new user"
+		echo " 2) Revoke an existing user"
 		echo " 4) Exit"
 		read -p "Select an option [1-4]: " option
 
@@ -316,7 +316,7 @@ else
 	fi
 
 	# Get easy-rsa from Github
-	wget -O ~/EasyRSA-3.0.1.tgz https://github.com/OpenVPN/easy-rsa/releases/download/3.0.1/EasyRSA-3.0.1.tgz
+	wget -O ~/EasyRSA-3.0.1.tgz "https://github.com/OpenVPN/easy-rsa/releases/download/3.0.1/EasyRSA-3.0.1.tgz"
 	tar xzf ~/EasyRSA-3.0.1.tgz -C ~/
 	mv ~/EasyRSA-3.0.1/ /etc/openvpn/
 	mv /etc/openvpn/EasyRSA-3.0.1/ /etc/openvpn/easy-rsa/
@@ -498,7 +498,7 @@ exit 0' > $RCLOCAL
 	fi
 
 	# Try to detect a NATed connection and ask about it to potential LowEndSpirit/Scaleway users
-	EXTERNALIP=$(wget -qO- ipv4.icanhazip.com)
+	EXTERNALIP=$(wget -4qO- "http://whatismyip.akamai.com/")
 	if [[ "$IP" != "$EXTERNALIP" ]]; then
 		echo ""
 		echo "Looks like your server is behind a NAT!"
@@ -532,5 +532,5 @@ tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt
 	echo ""
 	echo "Finished!"
 	echo ""
-	echo "If you want to add clients, you simply need to run this script another time!"
+	echo "If you want to add clients, you simply need to run this script again!"
 fi
