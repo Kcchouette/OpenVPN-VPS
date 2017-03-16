@@ -42,21 +42,37 @@ fi
 
 #Build a new client
 newclient () {
-	#Generate a custom client.ovpn
-	cp /etc/openvpn/client-template.txt ~/$1.ovpn
-	echo "<ca>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1.ovpn
-	echo "</ca>" >> ~/$1.ovpn
-	echo "<cert>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/issued/$1.crt >> ~/$1.ovpn
-	echo "</cert>" >> ~/$1.ovpn
-	echo "<key>" >> ~/$1.ovpn
-	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1.ovpn
-	echo "</key>" >> ~/$1.ovpn
-	echo "key-direction 1" >> ~/$1.ovpn
-	echo "<tls-auth>" >> ~/$1.ovpn
-	cat /etc/openvpn/tls-auth.key >> ~/$1.ovpn
-	echo "</tls-auth>" >> ~/$1.ovpn
+	#Generate a custom client_udp.ovpn
+	cp /etc/openvpn/client-template_udp.txt ~/$1_udp.ovpn
+	echo "<ca>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1_udp.ovpn
+	echo "</ca>" >> ~/$1_udp.ovpn
+	echo "<cert>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/issued/$1.crt >> ~/$1_udp.ovpn
+	echo "</cert>" >> ~/$1_udp.ovpn
+	echo "<key>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1_udp.ovpn
+	echo "</key>" >> ~/$1_udp.ovpn
+	echo "key-direction 1" >> ~/$1_udp.ovpn
+	echo "<tls-auth>" >> ~/$1_udp.ovpn
+	cat /etc/openvpn/tls-auth.key >> ~/$1_udp.ovpn
+	echo "</tls-auth>" >> ~/$1_udp.ovpn
+	
+	#same for tcp
+	cp /etc/openvpn/client-template_tcp.txt ~/$1_tcp.ovpn
+	echo "<ca>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/ca.crt >> ~/$1_tcp.ovpn
+	echo "</ca>" >> ~/$1_tcp.ovpn
+	echo "<cert>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/issued/$1.crt >> ~/$1_tcp.ovpn
+	echo "</cert>" >> ~/$1_tcp.ovpn
+	echo "<key>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1_tcp.ovpn
+	echo "</key>" >> ~/$1_tcp.ovpn
+	echo "key-direction 1" >> ~/$1_tcp.ovpn
+	echo "<tls-auth>" >> ~/$1_tcp.ovpn
+	cat /etc/openvpn/tls-auth.key >> ~/$1_tcp.ovpn
+	echo "</tls-auth>" >> ~/$1_tcp.ovpn
 }
 
 # Try to get our IP from the system and fallback to the Internet.
@@ -68,7 +84,7 @@ if [[ "$IP" = "" ]]; then
 fi
 
 
-if [[ -e /etc/openvpn/server.conf ]]; then
+if [[ -e /etc/openvpn/server_udp.conf ]] || [[ -e /etc/openvpn/server_tcp.conf ]]; then
 	while :
 	do
 	clear
@@ -356,9 +372,7 @@ set_var EASYRSA_CERT_EXPIRE	"365"
 	chmod 644 /etc/openvpn/crl.pem
 
 	# Generate server.conf
-	echo "port $PORT
-proto $PROTOCOL
-dev tun
+	echo "dev tun
 max-clients $MAXCONNS
 ca ca.crt
 cert server.crt
@@ -375,7 +389,6 @@ tls-version-min 1.2
 tls-cipher $TLSCIPHER" > /etc/openvpn/server.conf
 
 	echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
-
 
 	# DNS resolvers
 	case $DNS in
@@ -428,6 +441,14 @@ tls-server
 tls-auth tls-auth.key 0
 verb 0" >> /etc/openvpn/server.conf
 
+echo "port $PORT
+proto udp" | cat - /etc/openvpn/server.conf > /etc/openvpn/server_udp.conf
+	
+echo "port 443
+proto tcp" | cat - /etc/openvpn/server.conf > /etc/openvpn/server_tcp.conf
+
+rm /etc/openvpn/server.conf
+
 
 	# Create the sysctl configuration file if needed (mainly for Arch Linux)
 	if [[ ! -e $SYSCTL ]]; then
@@ -458,8 +479,12 @@ exit 0' > $RCLOCAL
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
 		# avoid a firewalld reload.
-		firewall-cmd --zone=public --add-port=$PORT/$PROTOCOL
-		firewall-cmd --permanent --zone=public --add-port=$PORT/$PROTOCOL
+
+		firewall-cmd --zone=public --add-port=$PORT/udp
+		firewall-cmd --permanent --zone=public --add-port=$PORT/udp
+
+		firewall-cmd --zone=public --add-port=443/tcp
+		firewall-cmd --permanent --zone=public --add-port=443/tcp
 
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
@@ -468,11 +493,13 @@ exit 0' > $RCLOCAL
 		# If iptables has at least one REJECT rule, we asume this is needed.
 		# Not the best approach but I can't think of other and this shouldn't
 		# cause problems.
-		iptables -I INPUT -p $PROTOCOL --dport $PORT -j ACCEPT
+		iptables -I INPUT -p udp --dport $PORT -j ACCEPT
+		iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+
 		iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-		
-		sed -i "1 a\iptables -I INPUT -p $PROTOCOL --dport $PORT -j ACCEPT" $RCLOCAL
+		sed -i "1 a\iptables -I INPUT -p udp --dport $PORT -j ACCEPT" $RCLOCAL
+		sed -i "1 a\iptables -I INPUT -p tcp --dport 443 -j ACCEPT" $RCLOCAL
 
 		sed -i "1 a\iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" $RCLOCAL
@@ -481,8 +508,9 @@ exit 0' > $RCLOCAL
 	# If SELinux is enabled and a custom port was selected, we need this
 	if hash sestatus 2>/dev/null; then
 		if sestatus | grep "Current mode" | grep -qs "enforcing"; then
-			if [[ "$PORT" != '1194' || "$PROTOCOL" = 'tcp' ]]; then
-				semanage port -a -t openvpn_port_t -p $PROTOCOL $PORT
+			if [[ "$PORT" != '1194' ]]; then
+				semanage port -a -t openvpn_port_t -p udp $PORT
+				semanage port -a -t openvpn_port_t -p tcp 443
 			fi
 		fi
 	fi
@@ -491,7 +519,8 @@ exit 0' > $RCLOCAL
 	if [[ "$OS" = 'debian' ]]; then
 		# Little hack to check for systemd
 		if pgrep systemd-journal; then
-			systemctl restart openvpn@server.service
+			systemctl restart openvpn@server_tcp.service
+			systemctl restart openvpn@server_udp.service
 		else
 			/etc/init.d/openvpn restart
 		fi
@@ -515,8 +544,6 @@ exit 0' > $RCLOCAL
 	# client-template.txt is created so we have a template to add further users later
 	echo "client
 dev tun
-proto $PROTOCOL
-remote $IP $PORT
 resolv-retry infinite
 nobind
 persist-key
@@ -529,8 +556,14 @@ tls-version-min 1.2
 tls-client
 tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt
 
-	echo ""
-	echo "Finished!"
-	echo ""
-	echo "If you want to add clients, you simply need to run this script again!"
+  echo "proto udp
+remote $IP $PORT" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_udp.txt
+
+  echo "proto tcp
+remote $IP 443" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_tcp.txt
+
+  echo ""
+  echo "Finished!"
+  echo ""
+  echo "If you want to add clients, you simply need to run this script again!"
 fi
