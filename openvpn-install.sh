@@ -80,7 +80,7 @@ newclient () {
 # and to avoid getting an IPv6.
 IP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 if [[ "$IP" = "" ]]; then
-	IP=$(wget -qO- ipv4.icanhazip.com)
+	IP=$(wget -4qO- "http://whatismyip.akamai.com/")
 fi
 
 
@@ -91,8 +91,8 @@ if [[ -e /etc/openvpn/server_udp.conf ]] || [[ -e /etc/openvpn/server_tcp.conf ]
 		echo "Looks like OpenVPN is already installed"
 		echo ""
 		echo "What do you want to do?"
-		echo " 1) Create a config file for an user"
-		echo " 2) Revoke existing user cert"
+		echo " 1) Create a new user"
+		echo " 2) Revoke an existing user"
 		echo " 4) Exit"
 		read -p "Select an option [1-4]: " option
 
@@ -153,20 +153,28 @@ else
 	echo "If your server is running behind a NAT, (e.g. LowEndSpirit, Scaleway) leave the IP address as it is. (local/private IP)"
 	echo "Otherwise, it should be your public IPv4 address."
 	read -p "IP address: " -e -i $IP IP
-
-	echo "What protocol do you want for OpenVPN?"
-	echo "Unless UDP is blocked, you should not use TCP (unnecessarily slower)"
-	while [[ $PROTOCOL != "UDP" && $PROTOCOL != "TCP" ]]; do
-		read -p "Protocol [UDP/TCP]: " -e -i UDP PROTOCOL
-	done
 	echo ""
+	
+	echo "Which protocol do you want for OpenVPN connections?"
+	echo "   1) UDP (recommended)"
+	echo "   2) TCP"
+	read -p "Protocol [1-2]: " -e -i 1 PROTOCOL
+	echo ""
+	case $PROTOCOL in
+		1) 
+		PROTOCOL=udp
+		;;
+		2) 
+		PROTOCOL=tcp
+		;;
+	esac
 
 	echo ""
 	echo "What port do you want for OpenVPN?"
 	read -p "Port: " -e -i 1194 PORT
 
 	echo ""
-	echo "What DNS do you want to use with the VPN?"
+	echo "Which DNS do you want to use with the VPN?"
 	echo " 1) Current system resolvers"
 	echo " 2) FDN (France)"
 	echo " 3) OpenNIC (the nearest)"
@@ -307,7 +315,8 @@ else
 		fi
 		# Ubuntu >= 16.04 and Debian > 8 have OpenVPN > 2.3.3 without the need of a third party repository.
 		# Then we install OpnVPN and some tools
-		apt-get install openvpn iptables openssl wget ca-certificates curl nano -y
+		#apt-get update && apt-get upgrade
+		apt-get install ca-certificates openvpn iptables openssl wget curl nano -y
 	fi
 
 	# Find out if the machine uses nogroup or nobody for the permissionless group
@@ -323,7 +332,7 @@ else
 	fi
 
 	# Get easy-rsa from Github
-	wget -O ~/EasyRSA-3.0.1.tgz https://github.com/OpenVPN/easy-rsa/releases/download/3.0.1/EasyRSA-3.0.1.tgz
+	wget -O ~/EasyRSA-3.0.1.tgz "https://github.com/OpenVPN/easy-rsa/releases/download/3.0.1/EasyRSA-3.0.1.tgz"
 	tar xzf ~/EasyRSA-3.0.1.tgz -C ~/
 	mv ~/EasyRSA-3.0.1/ /etc/openvpn/
 	mv /etc/openvpn/EasyRSA-3.0.1/ /etc/openvpn/easy-rsa/
@@ -345,7 +354,6 @@ set_var EASYRSA_REQ_CN		"$CACN"
 set_var EASYRSA_CA_EXPIRE	"365"
 set_var EASYRSA_CERT_EXPIRE	"365"
 " > vars
-	fi
 
 	# Create the PKI, set up the CA, the DH params and the server certificate
 	./easyrsa init-pki
@@ -456,6 +464,13 @@ rm /etc/openvpn/server.conf
 	# Avoid an unneeded reboot
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 
+	# Needed to use rc.local with some systemd distros
+	if [[ "$OS" = 'debian' && ! -e $RCLOCAL ]]; then
+		echo '#!/bin/sh -e
+exit 0' > $RCLOCAL
+	fi
+	chmod +x $RCLOCAL
+
 	# Set NAT for the VPN subnet
 	iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP
 	sed -i "1 a\iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to $IP" $RCLOCAL
@@ -483,8 +498,9 @@ rm /etc/openvpn/server.conf
 
 		iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-			sed -i "1 a\iptables -I INPUT -p udp --dport $PORT -j ACCEPT" $RCLOCAL
-			sed -i "1 a\iptables -I INPUT -p tcp --dport 443 -j ACCEPT" $RCLOCAL
+		sed -i "1 a\iptables -I INPUT -p udp --dport $PORT -j ACCEPT" $RCLOCAL
+		sed -i "1 a\iptables -I INPUT -p tcp --dport 443 -j ACCEPT" $RCLOCAL
+
 		sed -i "1 a\iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT" $RCLOCAL
 		sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" $RCLOCAL
 	fi
@@ -511,7 +527,7 @@ rm /etc/openvpn/server.conf
 	fi
 
 	# Try to detect a NATed connection and ask about it to potential LowEndSpirit/Scaleway users
-	EXTERNALIP=$(wget -qO- ipv4.icanhazip.com)
+	EXTERNALIP=$(wget -4qO- "http://whatismyip.akamai.com/")
 	if [[ "$IP" != "$EXTERNALIP" ]]; then
 		echo ""
 		echo "Looks like your server is behind a NAT!"
@@ -526,7 +542,8 @@ rm /etc/openvpn/server.conf
 	fi
 
 	# client-template.txt is created so we have a template to add further users later
-	echo "dev tun
+	echo "client
+dev tun
 resolv-retry infinite
 nobind
 persist-key
@@ -539,16 +556,14 @@ tls-version-min 1.2
 tls-client
 tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt
 
-	echo "client
-	proto udp
-	remote $IP $PORT" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_udp.txt
-	
-	echo "client
-	proto tcp
-	remote $IP 443" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_tcp.txt
+  echo "proto udp
+remote $IP $PORT" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_udp.txt
 
-	echo ""
-	echo "Finished!"
-	echo ""
-	echo "If you want to add clients, you simply need to run this script another time!"
+  echo "proto tcp
+remote $IP 443" | cat - /etc/openvpn/client-template.txt > /etc/openvpn/client-template_tcp.txt
+
+  echo ""
+  echo "Finished!"
+  echo ""
+  echo "If you want to add clients, you simply need to run this script again!"
 fi
