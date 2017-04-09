@@ -20,7 +20,8 @@ fi
 
 #check tun is available
 if [[ ! -e /dev/net/tun ]]; then
-	echo "TUN is not available"
+	echo "TUN is not available
+You need to enable TUN before running this script"
 	exit 3
 fi
 
@@ -36,7 +37,7 @@ if [[ -e /etc/debian_version ]]; then
 		exit 4
 	fi
 else
-	echo "Looks like you aren't running this installer on a Debian, Ubuntu system"
+	echo "Looks like you aren't running this installer on Debian or Ubuntu"
 	exit 4
 fi
 
