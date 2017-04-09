@@ -17,7 +17,7 @@ This fork includes the following features:
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
 - [DNS.WATCH DNS Servers](https://dns.watch/index)
-- What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md)
+- What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md))
 
 - TLS 1.2 only
 - TLS-auth support: it adds an additional HMAC signature to all SSL/TLS handshake packets for integrity verification thus allowing an additional level of security above and beyond that provided by SSL/TLS. [source](https://openvpn.net/index.php/open-source/documentation/howto.html#security) and provide a 2nd line of defense to the TLS channel.
