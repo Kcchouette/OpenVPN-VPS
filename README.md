@@ -13,6 +13,7 @@ This fork includes the following features:
 - Avoid DNS leak
 - Run server in unprivileged mode, reducing risks to the system
 - Up-to-date OpenVPN thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
+- No [internal networking](https://github.com/Nyr/openvpn-install/commit/6d51476047d6d7a610f292f9bbd6da75d2d8f96e)
 
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
@@ -67,5 +68,5 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 
 ## Based on:
 
-- https://github.com/Nyr/openvpn-install/tree/28f238bc435ecbc9007dc598ebe61d9d6b0e9c23
+- https://github.com/Nyr/openvpn-install/tree/6d51476047d6d7a610f292f9bbd6da75d2d8f96e
 - https://github.com/Angristan/OpenVPN-install/tree/e8554eb35abde7c29e835440d5979bfccf46e942
