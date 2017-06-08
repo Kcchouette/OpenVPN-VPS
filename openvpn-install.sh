@@ -171,7 +171,7 @@ else
 	
 	read -p "DNS [1-8]: " -e -i 8 DNS
 
-	echo "Choose which RSA Digest you want tu use to authentificate ssl connection"
+	echo "Choose which RSA Digest you want to use to authentificate ssl connection"
 	echo "   1) sha-256 (fastest, recommended)"
 	echo "   2) sha-384"
 	echo "   3) sha512 (most secure)"
