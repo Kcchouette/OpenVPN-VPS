@@ -351,7 +351,7 @@ set_var EASYRSA_CERT_EXPIRE	"365"
 	openvpn --genkey --secret /etc/openvpn/tls-auth.key
 
 	# Move all the generated files
-	cp pki/ca.crt pki/private/ca.key pki/dh.pem pki/issued/server.crt pki/private/server.key /etc/openvpn/easy-rsa/pki/crl.pem /etc/openvpn
+	cp pki/ca.crt pki/private/ca.key pki/dh.pem pki/issued/server.crt pki/private/server.key pki/crl.pem /etc/openvpn
 
 	# Make cert revocation list readable for non-root
 	chmod 644 /etc/openvpn/crl.pem
