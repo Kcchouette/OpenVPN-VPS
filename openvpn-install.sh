@@ -32,7 +32,7 @@ if [[ -e /etc/debian_version ]]; then
 	VERSION_ID=$(cat /etc/os-release | grep "VERSION_ID")
 	RCLOCAL='/etc/rc.local'
 	SYSCTL='/etc/sysctl.conf'
-	if [[ "$VERSION_ID" != 'VERSION_ID="7"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="8"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="12.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="14.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="16.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="16.10"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="17.04"' ]];  then
+	if [[ "$VERSION_ID" != 'VERSION_ID="7"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="8"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="9"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="12.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="14.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="16.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="16.10"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="17.04"' ]];  then
 		echo "Your version of Debian/Ubuntu is not supported. Please look at the documentation."
 		exit 4
 	fi
@@ -160,7 +160,7 @@ else
 
 	echo ""
 	echo "Which DNS do you want to use with the VPN?"
-	echo " 1) Current system resolvers"
+	echo " 1) Current system resolvers (using IPs in /etc/resolv.conf)"
 	echo " 2) FDN (France)"
 	echo " 3) OpenNIC (the nearest)"
 	echo " 4) DNS.WATCH (Germany)"
