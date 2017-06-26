@@ -69,4 +69,4 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 ## Based on:
 
 - https://github.com/Nyr/openvpn-install/tree/b2d8c73e1b4d8ce9c3e254717ecc9602eb4394b6
-- https://github.com/Angristan/OpenVPN-install/tree/d712e157951ff52dd3b4230c76403eda8f91755d
+- https://github.com/Angristan/OpenVPN-install/tree/2584de5d854245c91acea08074750a8240e9093e
