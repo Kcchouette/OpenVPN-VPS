@@ -14,6 +14,7 @@ This fork includes the following features:
 - Run server in unprivileged mode, reducing risks to the system
 - Up-to-date OpenVPN thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
 - No [internal networking](https://github.com/Nyr/openvpn-install/commit/6d51476047d6d7a610f292f9bbd6da75d2d8f96e)
+- Keep the [official 180 days of certif](https://github.com/Nyr/openvpn-install/commit/9c0579052f149dd46cc59b1b8bee53f3d54dc785)
 
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
@@ -68,5 +69,5 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 
 ## Based on:
 
-- https://github.com/Nyr/openvpn-install/tree/b2d8c73e1b4d8ce9c3e254717ecc9602eb4394b6
+- https://github.com/Nyr/openvpn-install/tree/8f881565b79429672a3fbe32ed1efae5961dad8f
 - https://github.com/Angristan/OpenVPN-install/tree/8103bd1947ad96fde8d82eb56ca79d9879b3198b
