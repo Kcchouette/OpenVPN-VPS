@@ -249,23 +249,6 @@ else
 
 	read -p "Maximum Connections: " -e -i 5 MAXCONNS
 
-	echo "Input CA Parameters:"
-	#INPUT CA PARAMETERS
-	read -p "CA Country: " -e -i US CACOUNTRY
-	#printf "$CACOUNTRY\n"
-	read -p "CA Province: " -e -i California CAPROVINCE
-	#printf "$CAPROVINCE\n"
-	read -p "CA City: " -e -i "San Francisco" CACITY
-	#printf "$CACITY\n"
-	read -p "CA ORG: " -e -i "Example Co" CAORG
-	#printf "$CAORG\n"
-	read -p "CA Email: " -e -i info@example.com CAEMAIL
-	#printf "$CAEMAIL\n"
-	read -p "CA OU: " -e -i "My Organization" CAOU
-	#printf "$CAOU\n"
-	read -p "CA CN: " -e -i "My Name" CACN
-	#printf "$CACN\n"
-	#END CA INPUT
 	echo ""
 	echo "Okay, we are ready to setup your OpenVPN server now"
 	read -n1 -r -p "Press any key to continue..."
@@ -328,16 +311,6 @@ else
 	# See https://github.com/OpenVPN/easy-rsa/blob/5a429d22c78604c95813b457a8bea565a39793fa/easyrsa3/easyrsa#L1015
 	echo "set_var EASYRSA_KEY_SIZE $KEY_SIZE
 set_var EASYRSA_DIGEST		$RSA_DIGEST
-set_var EASYRSA_DN		""org""
-set_var EASYRSA_REQ_COUNTRY	"$CACOUNTRY"
-set_var EASYRSA_REQ_PROVINCE	"$CAPROVINCE"
-set_var EASYRSA_REQ_CITY	"$CACITY"
-set_var EASYRSA_REQ_ORG		"$CAORG"
-set_var EASYRSA_REQ_EMAIL	"$CAEMAIL"
-set_var EASYRSA_REQ_OU		"$CAORG"
-set_var EASYRSA_REQ_CN		"$CACN"
-set_var EASYRSA_CA_EXPIRE	"365"
-set_var EASYRSA_CERT_EXPIRE	"365"
 " > vars
 
 	# Create the PKI, set up the CA, the DH params and the server certificate
