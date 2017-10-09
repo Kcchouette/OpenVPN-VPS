@@ -42,6 +42,13 @@ The script is made to work on these OS :
 
 **You have to enable the TUN module otherwise OpenVPN won't work.** If the TUN module is not enabled, the script will tell you. Ask your host if you don't know how to do it.
 
+**Update your OS before running this script!**
+
+```
+apt-get update
+apt-get upgrade
+```
+
 Then download the script, run it and follow the assistant:
 
 ```
