@@ -190,7 +190,7 @@ else
 		;;
 	esac	
 
-	echo "Choose what size of Diffie-Hellman/RSA certficiates/keys you want to use:"
+	echo "Choose what size of Diffie-Hellman/RSA certificates/keys you want to use:"
 	echo "   1) 2048 bits (fastest)"
 	echo "   2) 3072 bits (recommended, best compromise)"
 	echo "   3) 4096 bits (most secure)"
