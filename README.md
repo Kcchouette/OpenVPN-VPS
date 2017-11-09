@@ -25,7 +25,7 @@ This fork includes the following features:
 - TLS-auth support: it adds an additional HMAC signature to all SSL/TLS handshake packets for integrity verification thus allowing an additional level of security above and beyond that provided by SSL/TLS. [source](https://openvpn.net/index.php/open-source/documentation/howto.html#security) and provide a 2nd line of defense to the TLS channel.
 
 - tls-auth check that all incoming packets have a valid signature (using SHA512)
-- Securely negotiate a VPN connection using the PKI (Diffie-Hellman exchange with RSA key) = from 2048 to 4096 -> it allows Perfect Forward Secrecy (with Handshake)
+- Securely negotiate a VPN connection using the PKI (Diffie-Hellman exchange with RSA key) = from 2048 to 4096 -> it allows Perfect Forward Secrecy (with Handshake). Diffie-Hellman key and RSA key are the same size because of easy-RSA
 - Authentificate SSL connection using SHA-2 family (sha-256 to sha-512)
 - Encypt data through the AES-128 or AES-256 cipher
 - Encrypt control channel (network parameters and key material for the 'data channel') using TLS-DHE-RSA-WITH-AES-128-GCM-SHA256 or more
@@ -77,4 +77,4 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 ## Based on:
 
 - https://github.com/Nyr/openvpn-install/tree/8f881565b79429672a3fbe32ed1efae5961dad8f
-- https://github.com/Angristan/OpenVPN-install/tree/37d42e25fea4a46de5b5308c80dc457266af01c6
+- https://github.com/Angristan/OpenVPN-install/tree/8a384191de579d623b96267b4fedc33398e663c0
