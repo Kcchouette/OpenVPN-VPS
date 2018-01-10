@@ -1,4 +1,4 @@
-# How to install the openvpn software?
+# How to install the OpenVPN software?
 
 ----
 * Platforms
@@ -43,6 +43,7 @@
 
 
 ## GNU/Linux
+
 1. Install OpenVPN:
 
    `sudo apt-get install openvpn` OR `sudo yum install openvpn` OR `esoteric-package-manager hipster openvpn`
@@ -57,6 +58,7 @@
 
 
 ## GNU/Linux (NetworkManager)
+
 It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager. This gives you a nice little interface for connecting, and it properly handles the necessary DNS changes when you connect/disconnect. 
 
 1. First, download your `.ovpn` file.
@@ -67,7 +69,7 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
 1. Click the *Network* icon.
 1. Click the *+* button in the lower-left of the window.
 1. Select *VPN* from the Interface drop-down and click *Import*.
-1. Navigate to your .ovpn` file and select it.
+1. Navigate to your `.ovpn` file and select it.
 1. Select the VPN in the left-hand menu, and flip the switch to *ON*. You can also enable/disable the VPN by clicking on the WiFi/Network icon in the menu bar, scrolling to *VPN Connections*, and clicking on its name.
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
@@ -87,6 +89,7 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
 
 
 ## iOS
+
 1. Download [OpenVPN Connect][openvpn_ios] and launch it.
 1. Download your `.ovpn` file.
 1. Open iTunes on your computer and connect your phone.
@@ -98,8 +101,8 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
 [check_ip]: https://www.whatismyip.com/my-ip-information/
-[windows_url]: https://swupdate.openvpn.org/community/releases/openvpn-install-2.3.12-I601-x86_64.exe
-[osx_url]: https://tunnelblick.net/release/Tunnelblick_3.6.6_build_4582.dmg
-[openvpn_sourcecode]: https://swupdate.openvpn.org/community/releases/openvpn-2.3.12.tar.gz
+[windows_url]: https://swupdate.openvpn.org/community/releases/openvpn-install-2.4.4-I601.exe
+[osx_url]: https://tunnelblick.net/release/Latest_Tunnelblick_Stable.dmg
+[openvpn_sourcecode]: https://swupdate.openvpn.org/community/releases/openvpn-2.4.4.tar.gz
 [openvpn_android]: https://play.google.com/store/apps/details?id=de.blinkt.openvpn
 [openvpn_ios]: https://itunes.apple.com/us/app/openvpn-connect/id590379981
