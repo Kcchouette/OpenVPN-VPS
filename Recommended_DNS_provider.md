@@ -9,3 +9,5 @@ Update 28/11/2016
 3. [https://dns.watch/index](https://dns.watch/index) (Germany)
 4. [https://freedns.zone/en/](https://freedns.zone/en/) (Austria)
 5. [https://servers.opennicproject.org/](https://servers.opennicproject.org/) (Please use Log Anon/DNSCrypt)
+6. [https://ldn-fai.net/serveur-dns-recursif-ouvert/](https://ldn-fai.net/serveur-dns-recursif-ouvert/) (France)
+7. [https://www.fdn.fr/actions/dns/](https://www.fdn.fr/actions/dns/) (France)
