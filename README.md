@@ -15,6 +15,7 @@ This fork includes the following features:
 - Up-to-date OpenVPN thanks to [swupdate.openvpn.net](https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos)
 - No [internal networking](https://github.com/Nyr/openvpn-install/commit/6d51476047d6d7a610f292f9bbd6da75d2d8f96e)
 - Keep the [official 180 days of certif](https://github.com/Nyr/openvpn-install/commit/9c0579052f149dd46cc59b1b8bee53f3d54dc785)
+- Randomized certificate name
 
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
@@ -77,4 +78,4 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 ## Based on:
 
 - https://github.com/Nyr/openvpn-install/tree/33452242a1a8e2955eb1b0416c9d614062792843
-- https://github.com/Angristan/OpenVPN-install/tree/f681c0bd3426cc0f825345d483a283da537d34d2
+- https://github.com/Angristan/OpenVPN-install/tree/cffe4bee4ae9c8b27462255e4cbb026f9a4bcc0c
