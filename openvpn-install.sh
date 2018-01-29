@@ -308,23 +308,27 @@ else
 	rm -rf ~/EasyRSA-3.0.4.tgz
 	cd /etc/openvpn/easy-rsa/
 
+	# Generate a random, alphanumeric identifier of 16 characters for CN and one for server name
+	SERVER_CN="cn_$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
+	SERVER_NAME="server_$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
+
 	# See https://github.com/OpenVPN/easy-rsa/blob/5a429d22c78604c95813b457a8bea565a39793fa/easyrsa3/easyrsa#L1015
-	echo "set_var EASYRSA_KEY_SIZE $KEY_SIZE
-set_var EASYRSA_DIGEST $RSA_DIGEST
-" > vars
+	echo "set_var EASYRSA_KEY_SIZE $KEY_SIZE" > vars
+	echo "set_var EASYRSA_REQ_CN $SERVER_CN" >> vars
+	echo "set_var EASYRSA_DIGEST $RSA_DIGEST" >> vars
 
 	# Create the PKI, set up the CA, the DH params and the server certificate
 	./easyrsa init-pki
 	./easyrsa --batch build-ca nopass
 	./easyrsa gen-dh
-	./easyrsa build-server-full server nopass
+	./easyrsa build-server-full $SERVER_NAME nopass
 	./easyrsa gen-crl
 
 	# Generate tls-auth key
 	openvpn --genkey --secret /etc/openvpn/tls-auth.key
 
 	# Move all the generated files
-	cp pki/ca.crt pki/private/ca.key pki/dh.pem pki/issued/server.crt pki/private/server.key pki/crl.pem /etc/openvpn
+	cp pki/ca.crt pki/private/ca.key pki/dh.pem pki/issued/$SERVER_NAME.crt pki/private/$SERVER_NAME.key pki/crl.pem /etc/openvpn
 
 	# Make cert revocation list readable for non-root
 	chmod 644 /etc/openvpn/crl.pem
@@ -336,8 +340,8 @@ proto $PROTOCOL
 dev tun
 max-clients $MAXCONNS
 ca ca.crt
-cert server.crt
-key server.key
+cert $SERVER_NAME.crt
+key $SERVER_NAME.key
 dh dh.pem
 user nobody
 group $NOGROUP
@@ -509,6 +513,7 @@ persist-key
 persist-tun
 setenv opt block-outside-dns
 remote-cert-tls server
+verify-x509-name $SERVER_NAME name
 cipher $CIPHER
 auth SHA512
 tls-version-min 1.2
