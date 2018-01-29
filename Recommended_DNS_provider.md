@@ -2,7 +2,7 @@
 
 I recommand to use a DNS of the same country you are.
 
-Update 28/11/2016
+Update 29/01/2018
 
 1. [https://dns.d0wn.biz/](https://dns.d0wn.biz/) (a lot of country)
 2. [https://blog.uncensoreddns.org/](https://blog.uncensoreddns.org/) (Denmark)
