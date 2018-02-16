@@ -1,6 +1,6 @@
 # OpenVPN-VPS
 
-Install OpenVPN on a new VPS and some tools (nano)
+Install OpenVPN on a new VPS and some tools (nano).
 
 ## Fork
 
@@ -31,7 +31,7 @@ This fork includes the following features:
 - Encypt data through the AES-128 or AES-256 cipher
 - Encrypt control channel (network parameters and key material for the 'data channel') using TLS-DHE-RSA-WITH-AES-128-GCM-SHA256 or more
 
-**Note:** Both [NSA](https://cryptome.org/2016/01/CNSA-Suite-and-Quantum-Computing-FAQ.pdf) and [ANSSI](https://www.ssi.gouv.fr/uploads/2015/01/RGS_v-2-0_B1.pdf) recommend at least a 3072 bits for a future-proof key. As the size of the key will have an impact on speed, I leave the choice to use 2048, 3072 or 4096 bits RSA key. 4096 bits is what's most used and recommened today, but 3072 bits is still good.
+**Note:** Both [NSA](https://cryptome.org/2016/01/CNSA-Suite-and-Quantum-Computing-FAQ.pdf) and [ANSSI](https://www.ssi.gouv.fr/uploads/2015/01/RGS_v-2-0_B1.pdf) recommend at least a 3072 bits for a future-proof key. As the size of the key will have an impact on speed, I leave the choice to use 2048, 3072 or 4096 bits RSA key. 4096 bits is what's most used and recommended today, but 3072 bits is still good.
 
 ## Compatibility
 
@@ -78,4 +78,4 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 ## Based on:
 
 - https://github.com/Nyr/openvpn-install/tree/33452242a1a8e2955eb1b0416c9d614062792843
-- https://github.com/Angristan/OpenVPN-install/tree/febdc04340a3b020afe15e833fab1ea12106522a
+- https://github.com/Angristan/OpenVPN-install/tree/f252614a365ccb8b4a08339af3f77443aa69c0b3
