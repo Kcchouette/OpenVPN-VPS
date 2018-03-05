@@ -172,11 +172,11 @@ else
 	read -p "DNS [1-8]: " -e -i 8 DNS
 
 	echo "Choose which RSA Digest you want to use to authentificate ssl connection"
-	echo "   1) sha-256 (fastest, recommended)"
-	echo "   2) sha-384"
-	echo "   3) sha512 (most secure)"
+	echo "   1) sha256 (fastest)"
+	echo "   2) sha384"
+	echo "   3) sha512 (most secure, recommended)"
 	while [[ $RSA_DIGEST != "1" && $RSA_DIGEST != "2" && $RSA_DIGEST != "3" ]]; do
-		read -p "RSA Digest [1-3]: " -e -i 2 RSA_DIGEST
+		read -p "RSA Digest [1-3]: " -e -i 3 RSA_DIGEST
 	done
 	case $RSA_DIGEST in
 		1)
