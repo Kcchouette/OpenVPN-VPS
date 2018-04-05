@@ -19,7 +19,7 @@ This fork includes the following features:
 
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
-- [DNS.WATCH DNS Servers](https://dns.watch/index)
+- [Cloudflare](https://1.1.1.1/)
 - What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md))
 
 - TLS 1.2 only
@@ -77,5 +77,5 @@ See [INSTALL_OPENVPN.md](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/I
 
 ## Based on:
 
-- https://github.com/Nyr/openvpn-install/tree/33452242a1a8e2955eb1b0416c9d614062792843
-- https://github.com/Angristan/OpenVPN-install/tree/42f6553dcc2f6ca67cecaef9516ac621d10980e3
+- https://github.com/Nyr/openvpn-install/tree/e73503054e969a72f96a88b12a97cd724b3dcfbb
+- https://github.com/Angristan/OpenVPN-install/tree/853683b0b389903878c2d7e26d5ecf07bdba24d8
