@@ -163,13 +163,12 @@ else
 	echo " 1) Current system resolvers (using IPs in /etc/resolv.conf)"
 	echo " 2) FDN (France)"
 	echo " 3) OpenNIC (the nearest)"
-	echo " 4) DNS.WATCH (Germany)"
-	echo " 5) UncensoredDNS (Denmark)"
-	echo " 6) OpenDNS"
-	echo " 7) Google"
-	echo " 8) Enter 2 other DNS (recommended)"
+	echo " 4) Cloudflare"
+	echo " 5) OpenDNS"
+	echo " 6) Google"
+	echo " 7) Enter 2 other DNS (recommended)"
 	
-	read -p "DNS [1-8]: " -e -i 8 DNS
+	read -p "DNS [1-7]: " -e -i 7 DNS
 
 	echo "Choose which RSA Digest you want to use to authentificate ssl connection"
 	echo "   1) sha256 (fastest)"
@@ -371,33 +370,29 @@ tls-cipher $TLSCIPHER" > /etc/openvpn/server.conf
 			echo "push \"dhcp-option DNS $line\"" >> /etc/openvpn/server.conf
 		done
 		;;
-		2) #FDN
-		echo 'push "dhcp-option DNS 80.67.169.12"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 80.67.169.40"' >> /etc/openvpn/server.conf
+		2) # FDN
+		echo "push \"dhcp-option DNS 80.67.169.12\"" >> /etc/openvpn/server.conf
+		echo "push \"dhcp-option DNS 80.67.169.40\"" >> /etc/openvpn/server.conf
 		;;
-		3) #OpenNIC
-		#Getting the nearest OpenNIC servers using the geoip API
+		3) # OpenNIC
+		   # Getting the nearest OpenNIC servers using the geoip API
 		read ns1 ns2 <<< $(curl -s https://api.opennicproject.org/geoip/ | head -2 | awk '{print $1}')
 		echo "push \"dhcp-option DNS $ns1\"" >> /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS $ns2\"" >> /etc/openvpn/server.conf
 		;;
-		4) #DNS.WATCH 
-		echo 'push "dhcp-option DNS 84.200.69.80"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 84.200.70.40"' >> /etc/openvpn/server.conf
+		4) # Cloudflare
+		echo "push \"dhcp-option DNS 1.1.1.1\"" >> /etc/openvpn/server.conf
+		echo "push \"dhcp-option DNS 1.0.0.1\"" >> /etc/openvpn/server.conf
 		;;
-		5) #UncensoredDNS 
-		echo 'push "dhcp-option DNS 91.239.100.100"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 89.233.43.71"' >> /etc/openvpn/server.conf
+		6) # OpenDNS 
+		echo "push \"dhcp-option DNS 208.67.222.222\"" >> /etc/openvpn/server.conf
+		echo "push \"dhcp-option DNS 208.67.220.220\"" >> /etc/openvpn/server.conf
 		;;
-		6) #OpenDNS 
-		echo 'push "dhcp-option DNS 208.67.222.222"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 208.67.220.220"' >> /etc/openvpn/server.conf
+		7) # Google 
+		echo "push \"dhcp-option DNS 8.8.8.8\"" >> /etc/openvpn/server.conf
+		echo "push \"dhcp-option DNS 8.8.4.4\"" >> /etc/openvpn/server.conf
 		;;
-		7) #Google 
-		echo 'push "dhcp-option DNS 8.8.8.8"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 8.8.4.4"' >> /etc/openvpn/server.conf
-		;;
-		8) #other DNS
+		8) # Other DNS
 		read -p "IP for DNS_1: " -e DNS_1
 		read -p "IP for DNS_2: " -e DNS_2
 		echo "push \"dhcp-option DNS $DNS_1\"" >> /etc/openvpn/server.conf
