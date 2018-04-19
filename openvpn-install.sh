@@ -488,12 +488,12 @@ exit 0' > $RCLOCAL
 		echo ""
 		echo "Looks like your server is behind a NAT!"
 		echo ""
-		echo "If your server is NATed (e.g. LowEndSpirit, Scaleway, or behind a router),"
-		echo "then I need to know the address that can be used to access it from outside."
+		echo "If your server is bahind a NAT, then I need to know the address"
+		echo "that can be used to access it from outside."
 		echo "If that's not the case, just ignore this and leave the next field blank"
-		read -p "External IP or domain name: " -e USEREXTERNALIP
-		if [[ "$USEREXTERNALIP" != "" ]]; then
-			IP=$USEREXTERNALIP
+		read -p "Public IP: " -e PUBLICIP
+		if [[ "$PUBLICIP" != "" ]]; then
+			IP=$PUBLICIP
 		fi
 	fi
 
