@@ -384,15 +384,15 @@ tls-cipher $TLSCIPHER" > /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS 1.1.1.1\"" >> /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS 1.0.0.1\"" >> /etc/openvpn/server.conf
 		;;
-		6) # OpenDNS 
+		5) # OpenDNS 
 		echo "push \"dhcp-option DNS 208.67.222.222\"" >> /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS 208.67.220.220\"" >> /etc/openvpn/server.conf
 		;;
-		7) # Google 
+		6) # Google 
 		echo "push \"dhcp-option DNS 8.8.8.8\"" >> /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS 8.8.4.4\"" >> /etc/openvpn/server.conf
 		;;
-		8) # Other DNS
+		7) # Other DNS
 		read -p "IP for DNS_1: " -e DNS_1
 		read -p "IP for DNS_2: " -e DNS_2
 		echo "push \"dhcp-option DNS $DNS_1\"" >> /etc/openvpn/server.conf
