@@ -7,7 +7,7 @@
 # your Debian/Ubuntu box.
 
 # Detect Debian users running the script with "sh" instead of bash
-if readlink /proc/$$/exe | grep -qs "dash"; then
+if readlink /proc/$$/exe | grep -q "dash"; then
 	echo "This script needs to be run with bash, not sh"
 	exit 1
 fi
@@ -60,21 +60,12 @@ newclient () {
 	echo "</tls-auth>" >> ~/$1.ovpn
 }
 
-# Try to get our IP from the system and fallback to the Internet.
-# I do this to make the script compatible with NATed servers (LowEndSpirit/Scaleway)
-# and to avoid getting an IPv6.
-IP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
-if [[ "$IP" = "" ]]; then
-	IP=$(wget -4qO- "http://whatismyip.akamai.com/")
-fi
-
-
 if [[ -e /etc/openvpn/server.conf ]]; then
 	while :
 	do
 	clear
 		echo "Looks like OpenVPN is already installed"
-		echo ""
+		echo
 		echo "What do you want to do?"
 		echo " 1) Create a new user"
 		echo " 2) Revoke an existing user"
@@ -83,7 +74,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 
 		case $option in
 			1)
-			echo ""
+			echo
 			echo "Tell me a name for the client config file"
 			echo "Please, use one word only, no special characters"
 			read -p "Client name: " -e -i client CLIENT
@@ -91,7 +82,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			./easyrsa build-client-full $CLIENT nopass
 			# Generates the custom client.ovpn
 			newclient "$CLIENT"
-			echo ""
+			echo
 			echo "Client $CLIENT added, config file available at ~/$CLIENT.ovpn"
 			exit
 			;;
@@ -102,7 +93,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 				echo "You have no existing clients!"
 				exit 6
 			fi
-			echo ""
+			echo
 			echo "Select the existing client certificate you want to revoke"
 			tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | nl -s ') '
 			if [[ "$NUMBEROFCLIENTS" = '1' ]]; then
@@ -114,14 +105,14 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			cd /etc/openvpn/easy-rsa/
 			./easyrsa --batch revoke $CLIENT
 			./easyrsa gen-crl
-			rm -rf pki/reqs/$CLIENT.req
-			rm -rf pki/private/$CLIENT.key
-			rm -rf pki/issued/$CLIENT.crt
-			rm -rf /etc/openvpn/crl.pem
+			rm -f pki/reqs/$CLIENT.req
+			rm -f pki/private/$CLIENT.key
+			rm -f pki/issued/$CLIENT.crt
+			rm -f /etc/openvpn/crl.pem
 			cp /etc/openvpn/easy-rsa/pki/crl.pem /etc/openvpn/crl.pem
 			# CRL is read with each client connection, when OpenVPN is dropped to nobody
 			chown nobody:$GROUPNAME /etc/openvpn/crl.pem
-			echo ""
+			echo
 			echo "Certificate for client $CLIENT revoked"
 			echo "Exiting..."
 			exit
@@ -131,20 +122,28 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	done
 else
 	clear # OpenVPN setup and first user creation
-	echo 'Welcome to this quick OpenVPN installer'
+	echo 'Welcome to this OpenVPN installer!'
 
-	echo ""
+	echo
 	echo "I need to know the IPv4 address of the network interface you want OpenVPN listening to."
 	echo "If your server is running behind a NAT, (e.g. LowEndSpirit, Scaleway) leave the IP address as it is. (local/private IP)"
 	echo "Otherwise, it should be your public IPv4 address."
+	IP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 	read -p "IP address: " -e -i $IP IP
-	echo ""
+	# If $IP is a private IP address, the server must be behind NAT
+	if echo "$IP" | grep -qE '^(10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.|192\.168)'; then
+		echo
+		echo "This server is behind NAT. What is the public IPv4 address or hostname?"
+		read -p "Public IP address / hostname: " -e PUBLICIP
+	fi
+	echo
 	
+	echo
 	echo "Which protocol do you want for OpenVPN connections?"
 	echo "   1) UDP (recommended)"
 	echo "   2) TCP"
 	read -p "Protocol [1-2]: " -e -i 1 PROTOCOL
-	echo ""
+	echo
 	case $PROTOCOL in
 		1) 
 		PROTOCOL=udp
@@ -154,11 +153,11 @@ else
 		;;
 	esac
 
-	echo ""
+	echo
 	echo "What port do you want for OpenVPN?"
 	read -p "Port: " -e -i 1194 PORT
 
-	echo ""
+	echo
 	echo "Which DNS do you want to use with the VPN?"
 	echo " 1) Current system resolvers (using IPs in /etc/resolv.conf)"
 	echo " 2) FDN (France)"
@@ -248,8 +247,8 @@ else
 
 	read -p "Maximum Connections: " -e -i 5 MAXCONNS
 
-	echo ""
-	echo "Okay, we are ready to setup your OpenVPN server now"
+	echo
+	echo "Okay, we are ready to set up your OpenVPN server now."
 	read -n1 -r -p "Press any key to continue..."
 
 	if [[ "$OS" = 'debian' ]]; then
@@ -299,12 +298,13 @@ else
 	fi
 
 	# Get easy-rsa from Github
-	wget -O ~/EasyRSA-3.0.4.tgz "https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz"
-	tar xzf ~/EasyRSA-3.0.4.tgz -C ~/
+	EASYRSAURL='https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz'
+	wget -O ~/easyrsa.tgz "$EASYRSAURL"
+	tar xzf ~/easyrsa.tgz -C ~/
 	mv ~/EasyRSA-3.0.4/ /etc/openvpn/
 	mv /etc/openvpn/EasyRSA-3.0.4/ /etc/openvpn/easy-rsa/
 	chown -R root:root /etc/openvpn/easy-rsa/
-	rm -rf ~/EasyRSA-3.0.4.tgz
+	rm -f ~/easyrsa.tgz
 	cd /etc/openvpn/easy-rsa/
 
 	# Generate a random, alphanumeric identifier of 16 characters for CN and one for server name
@@ -482,19 +482,9 @@ exit 0' > $RCLOCAL
 		fi
 	fi
 
-	# Try to detect a NATed connection and ask about it to potential LowEndSpirit/Scaleway users
-	EXTERNALIP=$(wget -4qO- "http://whatismyip.akamai.com/")
-	if [[ "$IP" != "$EXTERNALIP" ]]; then
-		echo ""
-		echo "Looks like your server is behind a NAT!"
-		echo ""
-		echo "If your server is bahind a NAT, then I need to know"
-		echo "the IP adress or the hostname that can be used to access it from outside."
-		echo "If that's not the case, just ignore this and leave the next field blank"
-		read -p "Public IP (or hostname): " -e PUBLICIP
-		if [[ "$PUBLICIP" != "" ]]; then
-			IP=$PUBLICIP
-		fi
+	# If the server is behind a NAT, use the correct IP address
+	if [[ "$PUBLICIP" != "" ]]; then
+		IP=$PUBLICIP
 	fi
 
 	# client-template.txt is created so we have a template to add further users later
@@ -515,8 +505,8 @@ tls-version-min 1.2
 tls-client
 tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt
 
-	echo ""
+	echo
 	echo "Finished!"
-	echo ""
+	echo
 	echo "If you want to add clients, you simply need to run this script again!"
 fi
