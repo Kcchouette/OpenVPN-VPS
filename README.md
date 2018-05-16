@@ -19,7 +19,7 @@ This fork includes the following features:
 
 - [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
 - Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
-- [Cloudflare](https://1.1.1.1/)
+- [Cloudflare DNS](https://1.1.1.1/)
 - What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md))
 
 - TLS 1.2 only
