@@ -77,7 +77,7 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			echo
 			echo "Tell me a name for the client config file"
 			echo "Please, use one word only, no special characters"
-			read -p "Client name: " -e -i client CLIENT
+			read -p "Client name: " -e CLIENT
 			cd /etc/openvpn/easy-rsa/
 			./easyrsa build-client-full $CLIENT nopass
 			# Generates the custom client.ovpn
@@ -252,7 +252,7 @@ else
 	read -n1 -r -p "Press any key to continue..."
 
 	if [[ "$OS" = 'debian' ]]; then
-		apt-get install ca-certificates gpg -y
+		apt-get install ca-certificates gnupg -y
 
 		# We add the OpenVPN repo to get the latest version.
 		# Debian 7
