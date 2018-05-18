@@ -1,5 +1,14 @@
 # How to install the OpenVPN software?
 
+## Browser
+
+I recommend using Tor Brwser, that is a Mozilla hardening, but by [removing the Tor features of this browser](https://superuser.com/a/1117660):
+
+ - Upper right hand side of Tor Browser click on the three horizontal bars, click on **Preferences**, select the **Advanced** tab, click on **Network**, click on **Settings**, select **"No Proxy"** and hit OK.
+ - Upper right hand side of Tor Browser click on the three horizontal bars, click on **Add-ons**, choose **Disable** at the right of *Torbutton* and *TorLauncher*.
+ - Then type "about:config" into the url bar, go to "network.proxy.socks_remote_dns" right click and select Toggle (after that, the value should be **false**).
+  - At that point your browser won´t be using TOR proxy to access to the internet, but if you also want to disable the TOR service running in the background type "about:config" into the url bar, go to "extensions.torlauncher.start_tor", right click and select Toggle (after that, the value should be **false**).
+
 ----
 * Platforms
   * [Windows](#windows)
@@ -52,19 +61,20 @@
 1. Download your `.ovpn` file.
 1. Copy the downloaded `.ovpn` file to the location of your choice. */etc/openvpn/* is a decent option.
 1. On some distributions, the pushed DHCP DNS option from the OpenVPN server will be ignored. This means that your DNS queries will still be routed through your ISP's servers which makes them vulnerable to what is known as a DNS leak.
+**To avoid that**, for example Ubuntu come with script: just update `/etc/nsswitch.conf` and only keep *dns* in front of *hosts*; and add at the end of you `.ovpn` file something like: `script-security 2 \ up /etc/openvpn/update-resolv-conf \ down /etc/openvpn/update-resolv-conf`
 1. Execute OpenVPN, and pass it the .ovpn profile as an option.
-   `sudo openvpn [your .ovpn file]`
+   `sudo openvpn --config [your .ovpn file]`
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
 
 ## GNU/Linux (NetworkManager)
 
-It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager. This gives you a nice little interface for connecting, and it properly handles the necessary DNS changes when you connect/disconnect. 
+This method is very risky as there is some DNS leaks…
 
 1. First, download your `.ovpn` file.
 1. Install the OpenVPN plugin for NetworkManager.
 
-   `sudo apt-get install network-manager-openvpn`
+   `sudo apt-get install network-manager-openvpn network-manager-openvpn-gnome`
 1. Open your *System Settings*.
 1. Click the *Network* icon.
 1. Click the *+* button in the lower-left of the window.
@@ -101,7 +111,7 @@ It's preferable to configure Ubuntu using the OpenVPN plugin for NetworkManager.
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
 [check_ip]: https://www.whatismyip.com/my-ip-information/
-[windows_url]: https://swupdate.openvpn.org/community/releases/openvpn-install-2.4.4-I601.exe
+[windows_url]: https://swupdate.openvpn.org/community/releases/openvpn-install-2.4.6-I602.exe
 [osx_url]: https://tunnelblick.net/release/Latest_Tunnelblick_Stable.dmg
 [openvpn_sourcecode]: https://swupdate.openvpn.org/community/releases/openvpn-2.4.4.tar.gz
 [openvpn_android]: https://play.google.com/store/apps/details?id=de.blinkt.openvpn
