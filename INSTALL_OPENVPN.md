@@ -14,7 +14,6 @@ I recommend using Tor Brwser, that is a Mozilla hardening, but by [removing the 
   * [Windows](#windows)
   * [OS X](#os-x)
   * [GNU/Linux](#gnulinux)
-  * [Linux (Network-manager)](#gnulinux-networkmanager)
   * [Android](#android)
   * [iOS](#ios)
 
@@ -53,6 +52,11 @@ I recommend using Tor Brwser, that is a Mozilla hardening, but by [removing the 
 
 ## GNU/Linux
 
+Be careful. Some distros leaks your ISP DNS.
+For example, for Ubuntu, we recommend you to use the `via OpenVPN` method, while on Fedora, we recommend you to use the `via the OpenVPN plugin of NetworkManager`.
+
+### Via OpenVPN
+
 1. Install OpenVPN:
 
    `sudo apt-get install openvpn` OR `sudo yum install openvpn` OR `esoteric-package-manager hipster openvpn`
@@ -67,9 +71,7 @@ I recommend using Tor Brwser, that is a Mozilla hardening, but by [removing the 
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
 
-## GNU/Linux (NetworkManager)
-
-This method is very risky as there is some DNS leaks…
+##  Via the OpenVPN plugin of NetworkManager
 
 1. First, download your `.ovpn` file.
 1. Install the OpenVPN plugin for NetworkManager.
