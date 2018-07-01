@@ -416,12 +416,9 @@ verb 0" >> /etc/openvpn/server.conf
 	fi
 
 	# Enable net.ipv4.ip_forward for the system
-	sed -i '/\<net.ipv4.ip_forward\>/c\net.ipv4.ip_forward=1' $SYSCTL
-	if ! grep -q "\<net.ipv4.ip_forward\>" $SYSCTL; then
-		echo 'net.ipv4.ip_forward=1' >> $SYSCTL
-	fi
+	echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/30-openvpn-forward.conf
 
-	# Avoid an unneeded reboot
+	# Enable without waiting for a reboot or service restart
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 
 	if pgrep firewalld; then
