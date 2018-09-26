@@ -298,11 +298,11 @@ else
 	fi
 
 	# Get easy-rsa from Github
-	EASYRSAURL='https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.4/EasyRSA-3.0.4.tgz'
+	EASYRSAURL='https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.5/EasyRSA-nix-3.0.5.tgz'
 	wget -O ~/easyrsa.tgz "$EASYRSAURL"
 	tar xzf ~/easyrsa.tgz -C ~/
-	mv ~/EasyRSA-3.0.4/ /etc/openvpn/
-	mv /etc/openvpn/EasyRSA-3.0.4/ /etc/openvpn/easy-rsa/
+	mv ~/EasyRSA-3.0.5/ /etc/openvpn/
+	mv /etc/openvpn/EasyRSA-3.0.5/ /etc/openvpn/easy-rsa/
 	chown -R root:root /etc/openvpn/easy-rsa/
 	rm -f ~/easyrsa.tgz
 	cd /etc/openvpn/easy-rsa/
