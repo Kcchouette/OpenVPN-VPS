@@ -2,9 +2,8 @@
 
 I recommand to use a DNS of the same country you are.
 
-Update 28/02/2018
+Update 02/11/2018
 
- 1. [https://dns.d0wn.biz/](https://dns.d0wn.biz/) (a lot of country)
  1. [https://blog.uncensoreddns.org/](https://blog.uncensoreddns.org/) (Denmark)
  1. [https://dns.watch/index](https://dns.watch/index) (Germany)
  1. [https://freedns.zone/en/](https://freedns.zone/en/) (Austria)
