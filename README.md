@@ -35,9 +35,9 @@ This fork includes the following features:
 
 ## Compatibility
 
-The script is made to work on these OS :
+The script is made to work on these OS:
 
-- Debian 8
+- Debian 9
 
 ## Installation
 
