@@ -162,12 +162,13 @@ else
 	echo " 1) Current system resolvers (using IPs in /etc/resolv.conf)"
 	echo " 2) FDN (France)"
 	echo " 3) OpenNIC (the nearest)"
-	echo " 4) Cloudflare"
-	echo " 5) OpenDNS"
-	echo " 6) Google"
-	echo " 7) Enter 2 other DNS (recommended)"
+	echo " 4) Cloudflare (Anycast: worldwide)"
+	echo " 5) OpenDNS (Anycast: worldwide)"
+	echo " 6) Google (Anycast: worldwide)"
+	echo " 7) Quad9 uncensored (Anycast: worldwide)"
+	echo " 8) Enter 2 other DNS (recommended)"
 	
-	read -p "DNS [1-7]: " -e -i 7 DNS
+	read -p "DNS [1-8]: " -e -i 8 DNS
 
 	echo "Choose which RSA Digest you want to use to authentificate ssl connection"
 	echo "   1) sha256 (fastest)"
@@ -392,7 +393,11 @@ tls-cipher $TLSCIPHER" > /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS 8.8.8.8\"" >> /etc/openvpn/server.conf
 		echo "push \"dhcp-option DNS 8.8.4.4\"" >> /etc/openvpn/server.conf
 		;;
-		7) # Other DNS
+		7) # Quad9 uncensored 
+		echo "push \"dhcp-option DNS 9.9.9.10\"" >> /etc/openvpn/server.conf
+		echo "push \"dhcp-option DNS 149.112.112.10\"" >> /etc/openvpn/server.conf
+		;;
+		8) # Other DNS
 		read -p "IP for DNS_1: " -e DNS_1
 		read -p "IP for DNS_2: " -e DNS_2
 		echo "push \"dhcp-option DNS $DNS_1\"" >> /etc/openvpn/server.conf
