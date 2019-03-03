@@ -17,9 +17,7 @@ This fork includes the following features:
 - Keep the [official 180 days of certif](https://github.com/Nyr/openvpn-install/commit/9c0579052f149dd46cc59b1b8bee53f3d54dc785)
 - Randomized certificate name
 
-- [FDN's DNS Servers](https://www.fdn.fr/actions/dns/)
-- Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/)
-- [Cloudflare DNS](https://1.1.1.1/)
+- Some DNS choices: [FDN's DNS Servers](https://www.fdn.fr/actions/dns/), Nearest [OpenNIC DNS Servers](https://www.opennicproject.org/), [Cloudflare DNS](https://1.1.1.1/), [Quad9 uncensored DNS](https://quad9.net/doh-quad9-dns-servers/#UsingDoHwithQuad9DNSServers-AdditionalInformation)
 - What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md))
 
 - TLS 1.2 only
