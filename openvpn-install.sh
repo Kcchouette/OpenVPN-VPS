@@ -32,7 +32,7 @@ if [[ -e /etc/debian_version ]]; then
 	VERSION_ID=$(cat /etc/os-release | grep "VERSION_ID")
 	RCLOCAL='/etc/rc.local'
 	SYSCTL='/etc/sysctl.conf'
-	if [[ "$VERSION_ID" != 'VERSION_ID="7"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="8"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="9"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="14.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="16.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="17.10"' ]]; then
+	if [[ "$VERSION_ID" != 'VERSION_ID="8"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="9"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="16.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="18.04"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="18.10"' ]] && [[ "$VERSION_ID" != 'VERSION_ID="19.04"' ]]; then
 		echo "Your version of Debian/Ubuntu is not supported. Please look at the documentation."
 		exit 4
 	fi
@@ -256,31 +256,19 @@ else
 		apt-get install ca-certificates gnupg -y
 
 		# We add the OpenVPN repo to get the latest version.
-		# Debian 7
-		if [[ "$VERSION_ID" = 'VERSION_ID="7"' ]]; then
-			echo "deb http://build.openvpn.net/debian/openvpn/stable wheezy main" > /etc/apt/sources.list.d/openvpn.list
-			wget -O - https://swupdate.openvpn.net/repos/repo-public.gpg | apt-key add -
-			apt-get update
-		fi
 		# Debian 8
 		if [[ "$VERSION_ID" = 'VERSION_ID="8"' ]]; then
 			echo "deb http://build.openvpn.net/debian/openvpn/stable jessie main" > /etc/apt/sources.list.d/openvpn.list
 			wget -O - https://swupdate.openvpn.net/repos/repo-public.gpg | apt-key add -
 			apt update
 		fi
-		# Ubuntu 12.04
-		if [[ "$VERSION_ID" = 'VERSION_ID="12.04"' ]]; then
-			echo "deb http://build.openvpn.net/debian/openvpn/stable precise main" > /etc/apt/sources.list.d/openvpn.list
-			wget -O - https://swupdate.openvpn.net/repos/repo-public.gpg | apt-key add -
-			apt-get update
-		fi
-		# Ubuntu 14.04
+		# Ubuntu 16.04
 		if [[ "$VERSION_ID" = 'VERSION_ID="14.04"' ]]; then
-			echo "deb http://build.openvpn.net/debian/openvpn/stable trusty main" > /etc/apt/sources.list.d/openvpn.list
+			echo "deb http://build.openvpn.net/debian/openvpn/stable xenial main" > /etc/apt/sources.list.d/openvpn.list
 			wget -O - https://swupdate.openvpn.net/repos/repo-public.gpg | apt-key add -
 			apt-get update
 		fi
-		# Ubuntu >= 16.04 and Debian > 8 have OpenVPN > 2.3.3 without the need of a third party repository.
+		# Ubuntu > 16.04 and Debian > 8 have OpenVPN > 2.4 without the need of a third party repository.
 		# Then we install OpnVPN and some tools
 		#apt-get update && apt-get upgrade
 		apt-get install ca-certificates openvpn iptables openssl wget curl nano -y
