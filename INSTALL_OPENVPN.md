@@ -113,8 +113,8 @@ For example, for Ubuntu, we recommend you to use the `via OpenVPN` method, while
 1. Success! You can verify that your traffic is being routed properly by [looking up your IP address here][check_ip]. It should show different informations than yours.
 
 [check_ip]: https://www.whatismyip.com/my-ip-information/
-[windows_url]: https://swupdate.openvpn.org/community/releases/openvpn-install-2.4.6-I602.exe
+[windows_url]: https://openvpn.net/community-downloads/
 [osx_url]: https://tunnelblick.net/release/Latest_Tunnelblick_Stable.dmg
-[openvpn_sourcecode]: https://swupdate.openvpn.org/community/releases/openvpn-2.4.4.tar.gz
+[openvpn_sourcecode]: https://swupdate.openvpn.org/community/releases/openvpn-2.4.7.tar.gz
 [openvpn_android]: https://play.google.com/store/apps/details?id=de.blinkt.openvpn
 [openvpn_ios]: https://itunes.apple.com/us/app/openvpn-connect/id590379981
