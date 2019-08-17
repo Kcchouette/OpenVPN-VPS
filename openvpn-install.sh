@@ -55,9 +55,9 @@ newclient () {
 	cat /etc/openvpn/easy-rsa/pki/private/$1.key >> ~/$1.ovpn
 	echo "</key>" >> ~/$1.ovpn
 	echo "key-direction 1" >> ~/$1.ovpn
-	echo "<tls-auth>" >> ~/$1.ovpn
-	cat /etc/openvpn/tls-auth.key >> ~/$1.ovpn
-	echo "</tls-auth>" >> ~/$1.ovpn
+	echo "<tls-crypt>" >> ~/$1.ovpn
+	cat /etc/openvpn/tls-crypt.key >> ~/$1.ovpn
+	echo "</tls-crypt>" >> ~/$1.ovpn
 }
 
 if [[ -e /etc/openvpn/server.conf ]]; then
@@ -170,79 +170,56 @@ else
 	
 	read -p "DNS [1-8]: " -e -i 8 DNS
 
-	echo "Choose which RSA Digest you want to use to authentificate ssl connection"
-	echo "   1) sha256 (fastest)"
-	echo "   2) sha384"
-	echo "   3) sha512 (most secure, recommended)"
-	while [[ $RSA_DIGEST != "1" && $RSA_DIGEST != "2" && $RSA_DIGEST != "3" ]]; do
-		read -p "RSA Digest [1-3]: " -e -i 3 RSA_DIGEST
+	echo "Choose what curve of Diffie-Hellman/certificates/keys you want to use:"
+	echo "   1) prime256v1 (fastest)"
+	echo "   2) secp384r1 (recommended, best compromise)"
+	echo "   3) secp521r1 (most secure)"
+	while [[ $CERT_CURVE != "1" && $CERT_CURVE != "2" && $CERT_CURVE != "3" ]]; do
+		read -p "Curve [1-3]: " -e -i 2 CERT_CURVE
 	done
-	case $RSA_DIGEST in
+	case $CERT_CURVE in
 		1)
-		RSA_DIGEST="sha256"
+		CERT_CURVE="prime256v1"
 		;;
 		2)
-		RSA_DIGEST="sha384"
+		CERT_CURVE="secp384r1"
 		;;
 		3)
-		RSA_DIGEST="sha512"
-		;;
-	esac	
-
-	echo "Choose what size of Diffie-Hellman/RSA certificates/keys you want to use:"
-	echo "   1) 2048 bits (fastest)"
-	echo "   2) 3072 bits (recommended, best compromise)"
-	echo "   3) 4096 bits (most secure)"
-	while [[ $KEY_SIZE != "1" && $KEY_SIZE != "2" && $KEY_SIZE != "3" ]]; do
-		read -p "Key size [1-3]: " -e -i 2 KEY_SIZE
-	done
-	case $KEY_SIZE in
-		1)
-		KEY_SIZE="2048"
-		;;
-		2)
-		KEY_SIZE="3072"
-		;;
-		3)
-		KEY_SIZE="4096"
+		CERT_CURVE="secp521r1"
 		;;
 	esac
 
 	echo "Choose which cipher you want to use for the control channel:"
-	echo "   1) TLS-DHE-RSA-WITH-AES-128-GCM-SHA256 (fastest)"
-	echo "   2) TLS-DHE-RSA-WITH-AES-256-CBC-SHA256 (recommended, best compromise)"
-	echo "   3) TLS-DHE-RSA-WITH-AES-256-GCM-SHA384 (most secure)"
-	while [[ $TLSCIPHER != "1" && $TLSCIPHER != "2" && $TLSCIPHER != "3" ]]; do
-		read -p "TLS Cipher [1-3]: " -e -i 2 TLSCIPHER
+	echo "   1) TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256 (recommended, fastest)"
+	echo "   2) TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384 (most secure)"
+	while [[ $TLSCIPHER != "1" && $TLSCIPHER != "2" ]]; do
+		read -p "TLS Cipher [1-2]: " -e -i 1 TLSCIPHER
 	done
 	case $TLSCIPHER in
 		1)
-		TLSCIPHER="TLS-DHE-RSA-WITH-AES-128-GCM-SHA256"
+		TLSCIPHER="TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256"
 		;;
 		2)
-		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-CBC-SHA256"
-		;;
-		3)
-		TLSCIPHER="TLS-DHE-RSA-WITH-AES-256-GCM-SHA384"
+		TLSCIPHER="TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384"
 		;;
 	esac
 
 	echo "Choose which cipher you want to use for the data channel:"
-	echo "   1) AES-128-CBC (fastest)"
-	echo "   2) AES-192-CBC (recommended, best compromise)"
-	echo "   3) AES-256-CBC (most secure)"
+	echo "   1) AES-128-GCM (recommended, fastest)"
+	echo "   2) AES-192-GCM (best compromise)"
+	echo "   3) AES-256-GCM (most secure)"
 	while [[ $CIPHER != "1" && $CIPHER != "2" && $CIPHER != "3" ]]; do
-		read -p "Cipher [1-3]: " -e -i 2 CIPHER
+		read -p "Cipher [1-3]: " -e -i 1 CIPHER
 	done
 	case $CIPHER in
 		1)
-		CIPHER="AES-128-CBC"
+		CIPHER="AES-128-GCM"
 		;;
 		2)
-		CIPHER="AES-192-CBC"
+		CIPHER="AES-192-GCM"
 		;;
 		3)
-		CIPHER="AES-256-CBC"
+		CIPHER="AES-256-GCM"
 		;;
 	esac
 
@@ -300,23 +277,24 @@ else
 	SERVER_CN="cn_$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
 	SERVER_NAME="server_$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)"
 
-	# See https://github.com/OpenVPN/easy-rsa/blob/5a429d22c78604c95813b457a8bea565a39793fa/easyrsa3/easyrsa#L1015
-	echo "set_var EASYRSA_KEY_SIZE $KEY_SIZE" > vars
+	# See https://github.com/OpenVPN/easy-rsa/blob/bcec3b9ce6886ea49344afcbe6ab9fea1bc58c21/easyrsa3/easyrsa#L1522
+    echo "set_var EASYRSA_ALGO ec" > vars
+    echo "set_var EASYRSA_CURVE $CERT_CURVE" >> vars
 	echo "set_var EASYRSA_REQ_CN $SERVER_CN" >> vars
-	echo "set_var EASYRSA_DIGEST $RSA_DIGEST" >> vars
+	echo "set_var EASYRSA_DIGEST \"sha512\"" >> vars
 
 	# Create the PKI, set up the CA, the DH params and the server certificate
 	./easyrsa init-pki
 	./easyrsa --batch build-ca nopass
-	./easyrsa gen-dh
+
 	./easyrsa build-server-full $SERVER_NAME nopass
 	./easyrsa gen-crl
 
-	# Generate tls-auth key
-	openvpn --genkey --secret /etc/openvpn/tls-auth.key
+	# Generate tls-crypt key
+	openvpn --genkey --secret /etc/openvpn/tls-crypt.key
 
 	# Move all the generated files
-	cp pki/ca.crt pki/private/ca.key pki/dh.pem pki/issued/$SERVER_NAME.crt pki/private/$SERVER_NAME.key pki/crl.pem /etc/openvpn
+	cp pki/ca.crt pki/private/ca.key pki/issued/$SERVER_NAME.crt pki/private/$SERVER_NAME.key pki/crl.pem /etc/openvpn
 
 	# Make cert revocation list readable for non-root
 	chmod 644 /etc/openvpn/crl.pem
@@ -330,13 +308,15 @@ max-clients $MAXCONNS
 ca ca.crt
 cert $SERVER_NAME.crt
 key $SERVER_NAME.key
-dh dh.pem
+dh none
+ecdh-curve $CERT_CURVE
 user nobody
 group $NOGROUP
 topology subnet
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
 cipher $CIPHER
+ncp-ciphers $CIPHER
 auth SHA512
 tls-version-min 1.2
 tls-cipher $TLSCIPHER" > /etc/openvpn/server.conf
@@ -399,7 +379,7 @@ persist-key
 persist-tun
 crl-verify crl.pem
 tls-server
-tls-auth tls-auth.key 0
+tls-crypt tls-crypt.key 0
 verb 0" >> /etc/openvpn/server.conf
 
 
@@ -491,6 +471,7 @@ remote-cert-tls server
 verify-x509-name $SERVER_NAME name
 cipher $CIPHER
 auth SHA512
+auth-nocache
 tls-version-min 1.2
 tls-client
 tls-cipher $TLSCIPHER" > /etc/openvpn/client-template.txt

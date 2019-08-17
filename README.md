@@ -21,15 +21,13 @@ This fork includes the following features:
 - What-you-want DNS (see [Recommended DNS provider](https://github.com/Kcchouette/OpenVPN-VPS/blob/master/Recommended_DNS_provider.md))
 
 - TLS 1.2 only
-- TLS-auth support: it adds an additional HMAC signature to all SSL/TLS handshake packets for integrity verification thus allowing an additional level of security above and beyond that provided by SSL/TLS. [source](https://openvpn.net/index.php/open-source/documentation/howto.html#security) and provide a 2nd line of defense to the TLS channel.
+- TLS-crypt support: tls-crypt will add an additional HMAC signature to all SSL/TLS handshake packets for integrity verification and it'll also encrypt the TLS control channel.
 
-- tls-auth check that all incoming packets have a valid signature (using SHA512)
-- Securely negotiate a VPN connection using the PKI (Diffie-Hellman exchange with RSA key) = from 2048 to 4096 -> it allows Perfect Forward Secrecy (with Handshake). Diffie-Hellman key and RSA key are the same size because of easy-RSA
-- Authentificate SSL connection using SHA-2 family (sha-256 to sha-512)
-- Encypt data through the AES-128 or AES-256 cipher
-- Encrypt control channel (network parameters and key material for the 'data channel') using TLS-DHE-RSA-WITH-AES-128-GCM-SHA256 or more
-
-**Note:** Both [NSA](https://cryptome.org/2016/01/CNSA-Suite-and-Quantum-Computing-FAQ.pdf) and [ANSSI](https://www.ssi.gouv.fr/uploads/2015/01/RGS_v-2-0_B1.pdf) recommend at least a 3072 bits for a future-proof key. As the size of the key will have an impact on speed, I leave the choice to use 2048, 3072 or 4096 bits RSA key. 4096 bits is what's most used and recommended today, but 3072 bits is still good.
+- auth check that all incoming packets have a valid signature (using SHA512)
+- Securely negotiate a VPN connection using the PKI (Diffie-Hellman exchange with ECDSA key)
+- Authentificate SSL connection using SHA-2 family (sha-512)
+- Encypt data through the AES-128-GCM / AES-192-GCM / AES-256-GCM cipher
+- Encrypt control channel (network parameters and key material for the 'data channel') using TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256 or more
 
 ## Compatibility
 
@@ -62,7 +60,7 @@ Once it ends, you should run it again to add users:
 ./openvpn-install.sh
 ```
 
-Then give all the `.ovpn` to your client!
+Then give the `.ovpn` file to your client!
 
 ## Installation of openVPN for the client
 
